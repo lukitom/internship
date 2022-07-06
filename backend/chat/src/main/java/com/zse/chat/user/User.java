@@ -2,9 +2,7 @@ package com.zse.chat.user;
 
 import lombok.*;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Table
 @Entity(name = "chatUsers")
@@ -13,14 +11,14 @@ import javax.persistence.Table;
 @NoArgsConstructor
 public class User {
     @Id
-    private Long id;
-
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private int id;
     private String name;
-
-    private int age;
+    private String nick;
+    private Boolean deleted = false;
 
     @Override
     public String toString() {
-        return "name: " + name + '\n' + "age: " + age;
+        return "name: " + name + '\n' + "nick: " + nick;
     }
 }
