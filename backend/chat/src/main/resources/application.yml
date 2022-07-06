@@ -2,8 +2,8 @@ spring:
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/chatDB
-    username: ${POSTGRESQL_USERNAME}
-    password: ${POSTGRESQL_PASSWORD}
+    username: ${POSTGRESQL_USERNAME:x}
+    password: ${POSTGRESQL_PASSWORD:x}
   jpa:
     hibernate:
       ddl-auto: create-drop

@@ -1,13 +1,18 @@
 package com.zse.chat.user;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
 @Table
-@Entity(name = "chatUsers")
+@Entity(name = "chatUser")
 @Data
 @AllArgsConstructor
 @Builder
@@ -30,7 +35,7 @@ public class User {
 
     protected User(){
         this.id = 0;
-        this.name = null;
-        this.nick = null;
+        this.name = "";
+        this.nick = "";
     }
 }

@@ -1,19 +1,16 @@
 package com.zse.chat.user;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
-
-    @Autowired
-    public UserService(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
 
     public List<User> getAllUsers() {
         return (List<User>) userRepository.findAll();
@@ -33,7 +30,12 @@ public class UserService {
         return userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
     }
 
-    public User updateUserById(int id, UserController.UserDTO userDto) {
-        return userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
+    public User updateUserById(int id, UserController.UserDTO userDTO) {
+        User updatedUser = User.builder()
+                .id(id)
+                .name(userDTO.getName())
+                .nick(userDTO.getNick())
+                .build();
+        return userRepository.save(updatedUser);
     }
 }
