@@ -4,14 +4,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class UserService {
 
-    @Autowired
     private final UserRepository userRepository;
 
+    @Autowired
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
@@ -20,27 +19,21 @@ public class UserService {
         return (List<User>) userRepository.findAll();
     }
 
-    public void saveUser(UserController.UserDto userDto) {
-        final var user = new User();
-        user.setName(userDto.getName());
-        user.setNick(userDto.getNick());
+    public User saveUser(UserController.UserDTO userDto) {
+        final User user = User.builder()
+                .name(userDto.getName())
+                .nick(userDto.getNick())
+                .build();
 
         userRepository.save(user);
+        return user;
     }
 
-    public Optional<User> getUserById(int id) {
-        return userRepository.findById(id);
+    public User getUserById(int id) {
+        return userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
     }
 
-    public void updateUserById(int id, UserController.UserDto userDto) {
-        Optional<User> user = userRepository.findById(id);
-
-        if (user.isEmpty()) return;
-
-        User updatedUser = user.get();
-        updatedUser.setName(userDto.getName());
-        updatedUser.setNick(userDto.getNick());
-        userRepository.save(updatedUser);
-
+    public User updateUserById(int id, UserController.UserDTO userDto) {
+        return userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
     }
 }
