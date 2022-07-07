@@ -1,10 +1,10 @@
 package com.zse.chat.user;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -26,16 +26,21 @@ public class UserService {
         return user;
     }
 
-    public User getUserById(int id) {
-        return userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
+    public User getUserById(String nick) {
+        return userRepository.findByNick(nick).orElseThrow(() -> new UserNotFoundException(nick));
     }
 
-    public User updateUserById(int id, UserController.UserDTO userDTO) {
+    public User updateUserName(String nick, UserController.UserDTO userDTO) {
+        Optional<User> user = userRepository.findByNick(nick);
+
+        User savedUser = user.orElseThrow(() -> new UserNotFoundException(nick));
+
         User updatedUser = User.builder()
-                .id(id)
+                .id(savedUser.getId())
                 .name(userDTO.getName())
-                .nick(userDTO.getNick())
+                .nick(savedUser.getNick())
                 .build();
+
         return userRepository.save(updatedUser);
     }
 }

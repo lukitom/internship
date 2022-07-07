@@ -6,13 +6,12 @@ import lombok.Data;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.Table;
 
-@Table
-@Entity(name = "chatUser")
+@Entity(name = "chat_user")
 @Data
 @AllArgsConstructor
 @Builder
@@ -30,6 +29,7 @@ public class User {
     )
     private final int id;
     private final String name;
+    @Column(unique = true)
     private final String nick;
     private final Boolean deleted = false;
 

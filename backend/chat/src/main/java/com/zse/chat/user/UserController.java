@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RequestMapping("/users")
@@ -16,25 +15,19 @@ public class UserController {
 
     private final UserService userService;
 
-    @GetMapping("")
+    @GetMapping
     public List<UserDTO> getUsers(){
-        List<User> users = userService.getAllUsers();
-        List<UserDTO> usersDTO = new ArrayList<>();
-
-        for (User user : users){
-            UserDTO userDTO = UserDTO.builder()
-                    .name(user.getName())
-                    .nick(user.getNick())
-                    .build();
-            usersDTO.add(userDTO);
-        }
-
-        return usersDTO;
+        return userService.getAllUsers().stream()
+                .map(user -> UserDTO.builder()
+                        .name(user.getName())
+                        .nick(user.getNick())
+                        .build())
+                .toList();
     }
 
-    @GetMapping("/{id}")
-    public UserDTO getUser(@PathVariable int id){
-        User user = userService.getUserById(id);
+    @GetMapping("/{nick}")
+    public UserDTO getUser(@PathVariable String nick){
+        User user = userService.getUserById(nick);
 
         return UserDTO.builder()
                 .name(user.getName())
@@ -42,7 +35,7 @@ public class UserController {
                 .build();
     }
 
-    @PostMapping("")
+    @PostMapping
     public UserDTO createUser(@RequestBody UserDTO userDto){
         User savedUser = userService.saveUser(userDto);
 
@@ -52,9 +45,9 @@ public class UserController {
                 .build();
     }
 
-    @PutMapping("/{id}")
-    public UserDTO updateUser(@PathVariable int id, @RequestBody UserDTO userDto){
-        User updatedUser = userService.updateUserById(id, userDto);
+    @PutMapping("/{nick}")
+    public UserDTO updateUser(@PathVariable String nick, @RequestBody UserDTO userDto){
+        User updatedUser = userService.updateUserName(nick, userDto);
 
         return UserDTO.builder()
                 .name(updatedUser.getName())
