@@ -1,4 +1,4 @@
-package com.zse.chat.message;
+package com.zse.chat;
 
 import lombok.Builder;
 import lombok.Data;

@@ -30,6 +30,7 @@ public class Message {
     private final int id;
 
     @ManyToOne
+    @JoinColumn(name = "author_nick")
     private User author;
     private final String content;
     private final LocalDateTime createdAt;
