@@ -1,6 +1,7 @@
 package com.zse.chat;
 
 import com.zse.chat.message.MessageNotFoundException;
+import com.zse.chat.user.UserAlreadyExistsException;
 import com.zse.chat.user.UserNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -14,10 +15,20 @@ public class GlobalControllerAdvice {
 
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler({UserNotFoundException.class, MessageNotFoundException.class})
-    public ExceptionResponse NotFoundExceptionHandle(Exception notFoundException){
+    public ExceptionResponse notFoundExceptionHandle(Exception notFoundException){
         return ExceptionResponse.builder()
-                .responseCode(404)
+                .responseCode(HttpStatus.NOT_FOUND)
                 .exceptionMessage(notFoundException.getMessage())
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(UserAlreadyExistsException.class)
+    public ExceptionResponse userAlreadyExists(UserAlreadyExistsException userExistsException){
+        return ExceptionResponse.builder()
+                .responseCode(HttpStatus.BAD_REQUEST)
+                .exceptionMessage(userExistsException.getMessage())
                 .timestamp(LocalDateTime.now())
                 .build();
     }
