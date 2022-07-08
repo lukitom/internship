@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Tag(name = "Messeges")
+@Tag(name = "Messages")
 @RequestMapping("/messages")
 @RestController
 @RequiredArgsConstructor
@@ -37,9 +37,8 @@ public class MessageController {
 
     @Operation(
             summary = "Get message by Id",
-            parameters = {
-                    @Parameter(name = "id", description = "Message Id")
-            })
+            parameters = {@Parameter(name = "id", description = "Message Id")}
+    )
     @GetMapping("/{id}")
     public MessageResponseDTO getMessageById(@PathVariable int id){
         Message message = messageService.getMessageById(id);
@@ -67,10 +66,9 @@ public class MessageController {
     }
 
     @Operation(
-            summary = "Update message with Id",
-            parameters = {
-                    @Parameter(name = "id", description = "Message Id")
-            })
+            summary = "Update message by Id",
+            parameters = {@Parameter(name = "id", description = "Message Id")}
+    )
     @PutMapping("/{id}")
     public MessageResponseDTO updateMessage(@PathVariable int id, @RequestBody MessageRequestDTO messageRequestDTO){
         Message updatedMessage = messageService.updateMessageById(id, messageRequestDTO);

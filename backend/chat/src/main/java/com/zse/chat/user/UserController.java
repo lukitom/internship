@@ -32,9 +32,8 @@ public class UserController {
 
     @Operation(
             summary = "Get user by nick",
-            parameters = {
-                    @Parameter(name = "nick", description = "User nick")
-            })
+            parameters = {@Parameter(name = "nick", description = "User nick")}
+    )
     @GetMapping("/{nick}")
     public UserDTO getUser(@PathVariable String nick){
         User user = userService.getUserById(nick);
@@ -56,7 +55,10 @@ public class UserController {
                 .build();
     }
 
-    @Operation(summary = "Change User name")
+    @Operation(
+            summary = "Change User name",
+            parameters = {@Parameter(name = "nick", description = "User nick")}
+    )
     @PutMapping("/{nick}")
     public UserDTO updateUser(@PathVariable String nick, @RequestBody UserDTO userDto){
         User updatedUser = userService.updateUserName(nick, userDto);
