@@ -17,7 +17,7 @@ public class GlobalControllerAdvice {
     @ExceptionHandler({UserNotFoundException.class, MessageNotFoundException.class})
     public ExceptionResponse notFoundExceptionHandle(Exception notFoundException){
         return ExceptionResponse.builder()
-                .responseCode(HttpStatus.NOT_FOUND)
+                .responseCode(HttpStatus.NOT_FOUND.value())
                 .exceptionMessage(notFoundException.getMessage())
                 .timestamp(LocalDateTime.now())
                 .build();
@@ -27,7 +27,7 @@ public class GlobalControllerAdvice {
     @ExceptionHandler(UserAlreadyExistsException.class)
     public ExceptionResponse userAlreadyExists(UserAlreadyExistsException userExistsException){
         return ExceptionResponse.builder()
-                .responseCode(HttpStatus.BAD_REQUEST)
+                .responseCode(HttpStatus.BAD_REQUEST.value())
                 .exceptionMessage(userExistsException.getMessage())
                 .timestamp(LocalDateTime.now())
                 .build();
