@@ -24,8 +24,8 @@ public class UserController {
     public List<UserDTO> getUsers(){
         return userService.getAllUsers().stream()
                 .map(user -> UserDTO.builder()
-                        .name(user.getName())
-                        .nick(user.getNick())
+                        .name(user.getFirstName())
+                        .nick(user.getNickname())
                         .build())
                 .toList();
     }
@@ -39,8 +39,8 @@ public class UserController {
         User user = userService.getUserByNick(nick);
 
         return UserDTO.builder()
-                .name(user.getName())
-                .nick(user.getNick())
+                .name(user.getFirstName())
+                .nick(user.getNickname())
                 .build();
     }
 
@@ -50,8 +50,8 @@ public class UserController {
         User savedUser = userService.saveUser(userDto);
 
         return UserDTO.builder()
-                .name(savedUser.getName())
-                .nick(savedUser.getNick())
+                .name(savedUser.getFirstName())
+                .nick(savedUser.getNickname())
                 .build();
     }
 
@@ -64,8 +64,8 @@ public class UserController {
         User updatedUser = userService.updateUserName(nick, userDto);
 
         return UserDTO.builder()
-                .name(updatedUser.getName())
-                .nick(updatedUser.getNick())
+                .name(updatedUser.getFirstName())
+                .nick(updatedUser.getNickname())
                 .build();
     }
 

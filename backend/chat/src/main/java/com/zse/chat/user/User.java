@@ -10,6 +10,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import java.util.TimeZone;
 
 @Entity(name = "chat_user")
 @Data
@@ -28,14 +29,31 @@ public class User {
             }
     )
     private final int id;
-    private final String name;
     @Column(unique = true)
-    private final String nick;
+    private final String nickname;
+    private final String firstName;
+    private final String lastName;
+    @Column(unique = true, nullable = false)
+    private final String email;
+    private final String country;
+    private final String city;
+    private final Language userLanguage = Language.POLISH;
+    private final ContentLanguage contentLanguage = ContentLanguage.MY_LANGUAGE;
+    private final TimeZone timeZone = TimeZone.getTimeZone("Europe/Warsaw");
+
+
     private final Boolean deleted = false;
+    private final Boolean showFirstNameAndLastName = false;
+    private final Boolean showEmail = false;
+    private final Boolean showAddress = false;
 
     protected User(){
         this.id = 0;
-        this.name = "";
-        this.nick = "";
+        this.nickname = "";
+        this.firstName = "";
+        this.lastName = "";
+        this.email = "";
+        this.country = "";
+        this.city = "";
     }
 }

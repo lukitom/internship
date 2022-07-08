@@ -28,7 +28,7 @@ public class MessageController {
         return messageService.getAllMessages().stream()
                 .map(message -> MessageResponseDTO.builder()
                         .id(message.getId())
-                        .authorNick(message.getAuthor().getNick())
+                        .authorNick(message.getAuthor().getNickname())
                         .content(message.getContent())
                         .createdAt(message.getCreatedAt())
                         .build())
@@ -45,7 +45,7 @@ public class MessageController {
 
         return MessageResponseDTO.builder()
                 .id(message.getId())
-                .authorNick(message.getAuthor().getNick())
+                .authorNick(message.getAuthor().getNickname())
                 .content(message.getContent())
                 .createdAt(message.getCreatedAt())
                 .build();
@@ -59,7 +59,7 @@ public class MessageController {
 
         return MessageResponseDTO.builder()
                 .id(savedMessage.getId())
-                .authorNick(savedMessage.getAuthor().getNick())
+                .authorNick(savedMessage.getAuthor().getNickname())
                 .content(savedMessage.getContent())
                 .createdAt(savedMessage.getCreatedAt())
                 .build();
@@ -75,7 +75,7 @@ public class MessageController {
 
         return MessageResponseDTO.builder()
                 .id(updatedMessage.getId())
-                .authorNick(updatedMessage.getAuthor().getNick())
+                .authorNick(updatedMessage.getAuthor().getNickname())
                 .content(updatedMessage.getContent())
                 .createdAt(updatedMessage.getCreatedAt())
                 .build();
