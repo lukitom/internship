@@ -36,7 +36,7 @@ public class UserController {
     )
     @GetMapping("/{nick}")
     public UserDTO getUser(@PathVariable String nick){
-        User user = userService.getUserById(nick);
+        User user = userService.getUserByNick(nick);
 
         return UserDTO.builder()
                 .name(user.getName())
