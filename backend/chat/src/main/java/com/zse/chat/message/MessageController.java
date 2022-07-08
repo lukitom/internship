@@ -44,7 +44,7 @@ public class MessageController {
 
     @PostMapping
     public MessageResponseDTO createMessage(@RequestBody MessageRequestDTO messageRequestDTO){
-        User author = userService.getUserById(messageRequestDTO.getAuthorNick());
+        User author = userService.getUserByNick(messageRequestDTO.getAuthorNick());
         Message savedMessage = messageService.sendMessage(messageRequestDTO, author);
 
         return MessageResponseDTO.builder()

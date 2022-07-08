@@ -17,16 +17,22 @@ public class UserService {
     }
 
     public User saveUser(UserController.UserDTO userDto) {
+        String nick = userDto.getNick();
+        Optional<User> userInDB = userRepository.findByNick(nick);
+
+        if (userInDB.isPresent()){
+            throw new UserAlreadyExistsException(nick);
+        }
+
         final User user = User.builder()
                 .name(userDto.getName())
-                .nick(userDto.getNick())
+                .nick(nick)
                 .build();
 
-        userRepository.save(user);
-        return user;
+        return userRepository.save(user);
     }
 
-    public User getUserById(String nick) {
+    public User getUserByNick(String nick) {
         return userRepository.findByNick(nick).orElseThrow(() -> new UserNotFoundException(nick));
     }
 

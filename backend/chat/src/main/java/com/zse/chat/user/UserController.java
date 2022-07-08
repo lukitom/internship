@@ -1,7 +1,6 @@
 package com.zse.chat.user;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.extensions.Extension;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -33,7 +32,7 @@ public class UserController {
     @Operation(summary = "Get user by nick")
     @GetMapping("/{nick}")
     public UserDTO getUser(@PathVariable String nick){
-        User user = userService.getUserById(nick);
+        User user = userService.getUserByNick(nick);
 
         return UserDTO.builder()
                 .name(user.getName())
