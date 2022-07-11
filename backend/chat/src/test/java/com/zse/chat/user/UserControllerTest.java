@@ -11,8 +11,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -83,7 +82,7 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.responseCode", equalTo(404)))
                 .andExpect(jsonPath(
                         "$.exceptionMessage",
-                        equalTo("User not found. No nick: " + nick)));
+                        containsString(nick)));
     }
 
     @Test
@@ -129,7 +128,7 @@ class UserControllerTest {
     }
 
     @Test
-    public void shouldThrowTryingUpdateNotExistingUser() throws Exception {
+    public void shouldThrowUserNotFoundTryingUpdateNotExistingUser() throws Exception {
         String nick = "testNick";
         UserController.UserDTO userDTO = UserController.UserDTO.builder()
                 .name("testNameUpdated")
@@ -147,7 +146,7 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.responseCode", equalTo(404)))
                 .andExpect(jsonPath(
                         "$.exceptionMessage",
-                        equalTo("User not found. No nick: " + nick)));
+                        containsString(nick)));
     }
 
 }

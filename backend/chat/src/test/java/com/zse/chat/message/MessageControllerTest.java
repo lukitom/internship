@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zse.chat.user.User;
 import com.zse.chat.user.UserNotFoundException;
 import com.zse.chat.user.UserService;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -16,9 +15,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -99,7 +96,7 @@ class MessageControllerTest {
                 .andExpect(jsonPath("$.responseCode", equalTo(404)))
                 .andExpect(jsonPath(
                         "$.exceptionMessage",
-                        equalTo("Message not found. No Id: " + id)));
+                        containsString(String.valueOf(id))));
     }
 
     @Test
@@ -127,7 +124,7 @@ class MessageControllerTest {
     }
 
     @Test
-    public void shouldThrowNotFoundUserWhenCreatingMessage() throws Exception {
+    public void shouldThrowNotFoundUserWhenCreatingMessageForNonExistingUser() throws Exception {
         String nick = "testNick";
         var messageRequestDTO = MessageController.MessageRequestDTO.builder()
                 .authorNick(nick)
@@ -146,7 +143,7 @@ class MessageControllerTest {
                 .andExpect(jsonPath("$.responseCode", equalTo(404)))
                 .andExpect(jsonPath(
                         "$.exceptionMessage",
-                        equalTo("User not found. No nick: " + nick)));
+                        containsString(nick)));
     }
 
     @Test
@@ -176,7 +173,7 @@ class MessageControllerTest {
     }
 
     @Test
-    public void shouldThrowWhenTryingUpdateNotExistingMessage() throws Exception {
+    public void shouldThrowMessageNotFoundWhenTryingUpdateNotExistingMessage() throws Exception {
         int id = 1;
         var messageRequesDTO = MessageController.MessageRequestDTO.builder()
                 .authorNick("nickTest")
@@ -195,7 +192,7 @@ class MessageControllerTest {
                 .andExpect(jsonPath("$.responseCode", equalTo(404)))
                 .andExpect(jsonPath(
                         "$.exceptionMessage",
-                        equalTo("Message not found. No Id: " + id)));
+                        containsString(String.valueOf(id))));
     }
 
 }
