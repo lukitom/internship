@@ -26,12 +26,7 @@ public class MessageController {
     @GetMapping
     public List<MessageResponseDTO> getMessages(){
         return messageService.getAllMessages().stream()
-                .map(message -> MessageResponseDTO.builder()
-                        .id(message.getId())
-                        .authorNick(message.getAuthor().getNick())
-                        .content(message.getContent())
-                        .createdAt(message.getCreatedAt())
-                        .build())
+                .map(this::createMessageResponseDTO)
                 .toList();
     }
 
@@ -43,12 +38,7 @@ public class MessageController {
     public MessageResponseDTO getMessageById(@PathVariable int id){
         Message message = messageService.getMessageById(id);
 
-        return MessageResponseDTO.builder()
-                .id(message.getId())
-                .authorNick(message.getAuthor().getNick())
-                .content(message.getContent())
-                .createdAt(message.getCreatedAt())
-                .build();
+        return createMessageResponseDTO(message);
     }
 
     @Operation(summary = "Create new message")
@@ -57,12 +47,7 @@ public class MessageController {
         User author = userService.getUserByNick(messageRequestDTO.getAuthorNick());
         Message savedMessage = messageService.sendMessage(messageRequestDTO, author);
 
-        return MessageResponseDTO.builder()
-                .id(savedMessage.getId())
-                .authorNick(savedMessage.getAuthor().getNick())
-                .content(savedMessage.getContent())
-                .createdAt(savedMessage.getCreatedAt())
-                .build();
+        return  createMessageResponseDTO(savedMessage);
     }
 
     @Operation(
@@ -73,12 +58,7 @@ public class MessageController {
     public MessageResponseDTO updateMessage(@PathVariable int id, @RequestBody MessageRequestDTO messageRequestDTO){
         Message updatedMessage = messageService.updateMessageById(id, messageRequestDTO);
 
-        return MessageResponseDTO.builder()
-                .id(updatedMessage.getId())
-                .authorNick(updatedMessage.getAuthor().getNick())
-                .content(updatedMessage.getContent())
-                .createdAt(updatedMessage.getCreatedAt())
-                .build();
+        return createMessageResponseDTO(updatedMessage);
     }
 
     @Data
@@ -95,6 +75,15 @@ public class MessageController {
         private String authorNick;
         private String content;
         private LocalDateTime createdAt;
+    }
+
+    private MessageResponseDTO createMessageResponseDTO(Message message){
+        return MessageResponseDTO.builder()
+                .id(message.getId())
+                .authorNick(message.getAuthor().getNick())
+                .content(message.getContent())
+                .createdAt(message.getCreatedAt())
+                .build();
     }
 
 }

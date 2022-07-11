@@ -23,10 +23,7 @@ public class UserController {
     @GetMapping
     public List<UserDTO> getUsers(){
         return userService.getAllUsers().stream()
-                .map(user -> UserDTO.builder()
-                        .name(user.getName())
-                        .nick(user.getNick())
-                        .build())
+                .map(this::createUserDTO)
                 .toList();
     }
 
@@ -38,10 +35,7 @@ public class UserController {
     public UserDTO getUser(@PathVariable String nick){
         User user = userService.getUserByNick(nick);
 
-        return UserDTO.builder()
-                .name(user.getName())
-                .nick(user.getNick())
-                .build();
+        return createUserDTO(user);
     }
 
     @Operation(summary = "Create new User")
@@ -49,10 +43,7 @@ public class UserController {
     public UserDTO createUser(@RequestBody UserDTO userDto){
         User savedUser = userService.saveUser(userDto);
 
-        return UserDTO.builder()
-                .name(savedUser.getName())
-                .nick(savedUser.getNick())
-                .build();
+        return createUserDTO(savedUser);
     }
 
     @Operation(
@@ -63,10 +54,7 @@ public class UserController {
     public UserDTO updateUser(@PathVariable String nick, @RequestBody UserDTO userDto){
         User updatedUser = userService.updateUserName(nick, userDto);
 
-        return UserDTO.builder()
-                .name(updatedUser.getName())
-                .nick(updatedUser.getNick())
-                .build();
+        return createUserDTO(updatedUser);
     }
 
     @Data
@@ -75,5 +63,12 @@ public class UserController {
     static class UserDTO {
         private String name;
         private String nick;
+    }
+
+    private UserDTO createUserDTO(User user){
+        return UserDTO.builder()
+                .name(user.getName())
+                .nick(user.getNick())
+                .build();
     }
 }
