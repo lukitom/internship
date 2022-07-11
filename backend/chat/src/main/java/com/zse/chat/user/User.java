@@ -35,17 +35,20 @@ public class User {
     private final String lastName;
     @Column(unique = true, nullable = false)
     private final String email;
+    private final String phoneNumber;
     private final String country;
     private final String city;
-    private final Language userLanguage = Language.POLISH;
-    private final ContentLanguage contentLanguage = ContentLanguage.MY_LANGUAGE;
-    private final TimeZone timeZone = TimeZone.getTimeZone("Europe/Warsaw");
+    private final UserStatus userStatus;
+    private final Language userLanguage;
+    private final ContentLanguage contentLanguage;
+    private final TimeZone timeZone;
 
 
-    private final Boolean deleted = false;
-    private final Boolean showFirstNameAndLastName = false;
-    private final Boolean showEmail = false;
-    private final Boolean showAddress = false;
+    private final Boolean showFirstNameAndLastName;
+    private final Boolean showEmail;
+    private final Boolean showPhoneNumber;
+    private final Boolean showAddress;
+    private final Boolean deleted;
 
     protected User(){
         this.id = 0;
@@ -55,5 +58,17 @@ public class User {
         this.email = "";
         this.country = "";
         this.city = "";
+        this.phoneNumber = "";
+
+        this.userStatus = UserStatus.OFFLINE;
+        this.userLanguage = Language.POLISH;
+        this.contentLanguage = ContentLanguage.MY_LANGUAGE;
+        this.timeZone = TimeZone.getTimeZone("Europe/Warsaw");
+
+        this.deleted = false;
+        this.showFirstNameAndLastName = false;
+        this.showEmail = false;
+        this.showPhoneNumber = false;
+        this.showAddress = false;
     }
 }

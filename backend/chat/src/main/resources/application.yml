@@ -11,6 +11,8 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
     show-sql: true
+  jackson:
+    default-property-inclusion: non_null
 
 springdoc:
   api-docs:

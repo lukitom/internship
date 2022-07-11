@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @Tag(name = "Users")
 @RequestMapping("/users")
@@ -21,12 +22,9 @@ public class UserController {
 
     @Operation(summary = "Get all users")
     @GetMapping
-    public List<UserDTO> getUsers(){
+    public List<UserResponseDTO> getUsers(){
         return userService.getAllUsers().stream()
-                .map(user -> UserDTO.builder()
-                        .name(user.getFirstName())
-                        .nick(user.getNickname())
-                        .build())
+                .map(this::createUserResponseDTO)
                 .toList();
     }
 
@@ -35,45 +33,85 @@ public class UserController {
             parameters = {@Parameter(name = "nick", description = "User nick")}
     )
     @GetMapping("/{nick}")
-    public UserDTO getUser(@PathVariable String nick){
+    public UserResponseDTO getUser(@PathVariable String nick){
         User user = userService.getUserByNick(nick);
 
-        return UserDTO.builder()
-                .name(user.getFirstName())
-                .nick(user.getNickname())
-                .build();
+        return createUserResponseDTO(user);
     }
 
     @Operation(summary = "Create new User")
     @PostMapping
-    public UserDTO createUser(@RequestBody UserDTO userDto){
-        User savedUser = userService.saveUser(userDto);
+    public UserResponseDTO createUser(@RequestBody CreateUserDTO createUserDTO){
+        User savedUser = userService.saveUser(createUserDTO);
 
-        return UserDTO.builder()
-                .name(savedUser.getFirstName())
-                .nick(savedUser.getNickname())
-                .build();
+        return createUserResponseDTO(savedUser);
     }
 
-    @Operation(
-            summary = "Change User name",
-            parameters = {@Parameter(name = "nick", description = "User nick")}
-    )
-    @PutMapping("/{nick}")
-    public UserDTO updateUser(@PathVariable String nick, @RequestBody UserDTO userDto){
-        User updatedUser = userService.updateUserName(nick, userDto);
+    @Operation(summary = "Change User name")
+    @PutMapping
+    public UserResponseDTO updateUser(@RequestBody UpdateUserDTO updateUserDTO){
+        User updatedUser = userService.updateUser(updateUserDTO);
 
-        return UserDTO.builder()
-                .name(updatedUser.getFirstName())
-                .nick(updatedUser.getNickname())
-                .build();
+        return createUserResponseDTO(updatedUser);
     }
 
     @Data
     @AllArgsConstructor
     @Builder
-    static class UserDTO {
-        private String name;
+    static class UserResponseDTO {
         private String nick;
+        private String firstName;
+        private String lastName;
+        private String email;
+        private String phoneNumber;
+        private String country;
+        private String city;
+    }
+
+    @Data
+    @AllArgsConstructor
+    @Builder
+    static class CreateUserDTO {
+        private String nickname;
+        private String firstName;
+        private String lastName;
+        private String email;
+        private String phoneNumber;
+        private String country;
+        private String city;
+        private Optional<Language> language;
+        private Optional<ContentLanguage> contentLanguage;
+    }
+
+    @Data
+    @AllArgsConstructor
+    @Builder
+    static class UpdateUserDTO{
+        private String nickname;
+
+        private Optional<String> firstName;
+        private Optional<String> lastName;
+        private Optional<String> phoneNumber;
+        private Optional<String> country;
+        private Optional<String> city;
+        private Optional<Language> language;
+        private Optional<ContentLanguage> contentLanguage;
+
+        private Optional<Boolean> showFirstNameAndLastName;
+        private Optional<Boolean> showEmail;
+        private Optional<Boolean> showPhoneNumber;
+        private Optional<Boolean> showAddress;
+    }
+
+    private UserResponseDTO createUserResponseDTO(User user){
+        return UserResponseDTO.builder()
+                .nick(user.getNickname())
+                .firstName(user.getShowFirstNameAndLastName() ? user.getFirstName() : null)
+                .lastName(user.getShowFirstNameAndLastName() ? user.getLastName() : null)
+                .email(user.getShowEmail() ? user.getEmail() : null)
+                .city(user.getShowAddress() ? user.getCity() : null)
+                .country(user.getShowAddress() ? user.getCountry() : null)
+                .phoneNumber(user.getShowPhoneNumber() ? user.getPhoneNumber() : null)
+                .build();
     }
 }
