@@ -59,7 +59,7 @@ public class UserController {
     @AllArgsConstructor
     @Builder
     static class UserResponseDTO {
-        private String nick;
+        private String nickname;
         private String firstName;
         private String lastName;
         private String email;
@@ -105,7 +105,7 @@ public class UserController {
 
     private UserResponseDTO createUserResponseDTO(User user){
         return UserResponseDTO.builder()
-                .nick(user.getNickname())
+                .nickname(user.getNickname())
                 .firstName(user.getShowFirstNameAndLastName() ? user.getFirstName() : null)
                 .lastName(user.getShowFirstNameAndLastName() ? user.getLastName() : null)
                 .email(user.getShowEmail() ? user.getEmail() : null)
