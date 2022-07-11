@@ -110,7 +110,7 @@ class MessageControllerTest {
         Message message = new Message(1, user, "content1", LocalDateTime.now());
         String body = mapper.writeValueAsString(messageRequestDTO);
 
-        when(userService.getUserById(nick)).thenReturn(user);
+        when(userService.getUserByNick(nick)).thenReturn(user);
         when(messageService.sendMessage(messageRequestDTO, user)).thenReturn(message);
 
         mockMvc.perform(post("/messages")
@@ -133,7 +133,7 @@ class MessageControllerTest {
 
         String body = mapper.writeValueAsString(messageRequestDTO);
 
-        when(userService.getUserById(nick)).thenThrow(new UserNotFoundException(nick));
+        when(userService.getUserByNick(nick)).thenThrow(new UserNotFoundException(nick));
 
         mockMvc.perform(post("/messages")
                 .contentType(MediaType.APPLICATION_JSON)

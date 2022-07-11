@@ -61,7 +61,7 @@ class UserControllerTest {
         String nick = "testNick";
         User user = new User(1, "testName", nick);
 
-        when(userService.getUserById(nick)).thenReturn(user);
+        when(userService.getUserByNick(nick)).thenReturn(user);
 
         mockMvc.perform(get("/users/testNick"))
                 .andDo(print())
@@ -74,7 +74,7 @@ class UserControllerTest {
     public void shouldThrowNotExistingUser() throws Exception {
         String nick = "testNick";
 
-        when(userService.getUserById(nick)).thenThrow(new UserNotFoundException(nick));
+        when(userService.getUserByNick(nick)).thenThrow(new UserNotFoundException(nick));
 
         mockMvc.perform(get("/users/testNick"))
                 .andDo(print())
