@@ -1,12 +1,11 @@
 package com.zse.chat.user;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvFileSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -20,9 +19,7 @@ import java.util.TimeZone;
 
 import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -91,10 +88,6 @@ class UserControllerTest {
 
         when(userService.getAllUsers()).thenReturn(users);
 
-        for (User user : users){
-            System.out.println(user.getNickname());
-        }
-
         mockMvc.perform(get("/users"))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -114,7 +107,7 @@ class UserControllerTest {
     }
 
     @Test
-    public void shouldReturnUserByIdVisibleNickname() throws Exception {
+    public void shouldReturnUserByNicknameVisibleNickname() throws Exception {
         String nick = "testNickname1";
         User user = createUserForTest(1).build();
 
@@ -124,21 +117,6 @@ class UserControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.nickname", equalTo(nick)));
-    }
-
-    @Test
-    public void shouldThrowNotExistingUser() throws Exception {
-        String nick = "testNick";
-
-        when(userService.getUserByNick(nick)).thenThrow(new UserNotFoundException(nick));
-
-        mockMvc.perform(get("/users/" + nick))
-                .andDo(print())
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.responseCode", equalTo(404)))
-                .andExpect(jsonPath(
-                        "$.exceptionMessage",
-                        containsString(nick)));
     }
 
     @Test
@@ -157,7 +135,7 @@ class UserControllerTest {
         User user = createUserForTest(1).build();
         String body = mapper.writeValueAsString(createUserDTO);
 
-        when(userService.saveUser(ArgumentMatchers.any())).thenReturn(user);
+        when(userService.saveUser(createUserDTO)).thenReturn(user);
 
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -168,12 +146,25 @@ class UserControllerTest {
     }
 
     @Test
+    public void shouldThrowNotExistingUserWhenTryToFindByNotExistingNick() throws Exception {
+        String nick = "testNick";
+
+        when(userService.getUserByNick(nick)).thenThrow(new UserNotFoundException(nick));
+
+        mockMvc.perform(get("/users/" + nick))
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.responseCode", equalTo(404)))
+                .andExpect(jsonPath("$.exceptionMessage", containsString(nick)));
+    }
+
+    @Test
     public void shouldUpdateUserDetailsFoundByNicknameVisibleNickname() throws Exception {
         UserController.UpdateUserDTO updateUserDTO = createUserForTestUpdate(1).build();
         User user = createUserForTest(1).build();
         String body = mapper.writeValueAsString(updateUserDTO);
 
-        when(userService.updateUser(ArgumentMatchers.any())).thenReturn(user);
+        when(userService.updateUser(updateUserDTO)).thenReturn(user);
 
         mockMvc.perform(put("/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -183,16 +174,28 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.nickname", equalTo("testNickname1")));
     }
 
-    @Test
-    //TODO: check if any of the rest fields are visible
-    public void shouldUpdateUserDetailsFoundByNicknameVisibleEmail() throws Exception {
+    @ParameterizedTest(name = "name: {0}, email: {1}, phone: {2}, address: {3}")
+    @CsvFileSource(resources = "/visibilityUserFields.csv", numLinesToSkip = 1)
+    public void shouldUpdateUserDetailsFoundByNicknameVisible(
+            boolean showFirstNameAndLastName,
+            boolean showEmail,
+            boolean showPhoneNumber,
+            boolean showAddress) throws Exception {
         UserController.UpdateUserDTO updateUserDTO = createUserForTestUpdate(1)
-                .showEmail(Optional.of(true)).build();
+                .showFirstNameAndLastName(Optional.of(showFirstNameAndLastName))
+                .showEmail(Optional.of(showEmail))
+                .showPhoneNumber(Optional.of(showPhoneNumber))
+                .showAddress(Optional.of(showAddress))
+                .build();
         User user = createUserForTest(1)
-                .showEmail(true).build();
+                .showFirstNameAndLastName(showFirstNameAndLastName)
+                .showEmail(showEmail)
+                .showPhoneNumber(showPhoneNumber)
+                .showAddress(showAddress)
+                .build();
         String body = mapper.writeValueAsString(updateUserDTO);
 
-        when(userService.updateUser(ArgumentMatchers.any())).thenReturn(user);
+        when(userService.updateUser(updateUserDTO)).thenReturn(user);
 
         mockMvc.perform(put("/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -200,49 +203,71 @@ class UserControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.nickname", equalTo("testNickname1")))
-                .andExpect(jsonPath("$.email", equalTo("testEmail1")));
+                .andExpect(
+                        showFirstNameAndLastName ?
+                                jsonPath("$.firstName", equalTo("testFirstName1")) :
+                                jsonPath("$.firstName").doesNotExist()
+                )
+                .andExpect(
+                        showFirstNameAndLastName ?
+                                jsonPath("$.lastName", equalTo("testLastName1")) :
+                                jsonPath("$.lastName").doesNotExist()
+                )
+                .andExpect(
+                        showEmail ?
+                                jsonPath("$.email", equalTo("testEmail1")) :
+                                jsonPath("$.email").doesNotExist()
+                )
+                .andExpect(
+                        showPhoneNumber ?
+                                jsonPath("$.phoneNumber", equalTo("testPhoneNumber1")) :
+                                jsonPath("$.phoneNumber").doesNotExist()
+                )
+                .andExpect(
+                        showAddress ?
+                                jsonPath("$.country", equalTo("testCountry1")) :
+                                jsonPath("$.country").doesNotExist()
+                )
+                .andExpect(
+                        showAddress ?
+                                jsonPath("$.city", equalTo("testCity1")) :
+                                jsonPath("$.city").doesNotExist()
+                );
     }
 
     @Test
-    //TODO: check if any of the rest fields are visible
-    public void shouldUpdateUserDetailsFoundByNicknameVisiblePhoneNumber() throws Exception {
+    public void shouldThrowMissingArgumentTryingUpdateUserWithoutGivenNickname() throws Exception {
         UserController.UpdateUserDTO updateUserDTO = createUserForTestUpdate(1)
-                .showPhoneNumber(Optional.of(true)).build();
-        User user = createUserForTest(1)
-                .showPhoneNumber(true).build();
+                .nickname(null).build();
         String body = mapper.writeValueAsString(updateUserDTO);
 
-        when(userService.updateUser(ArgumentMatchers.any())).thenReturn(user);
+        when(userService.updateUser(updateUserDTO))
+                .thenThrow(new MissingPayloadFieldException("nickname"));
 
         mockMvc.perform(put("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.nickname", equalTo("testNickname1")))
-                .andExpect(jsonPath("$.phoneNumber", equalTo("testPhoneNumber1")));
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.responseCode", equalTo(400)))
+                .andExpect(jsonPath("$.exceptionMessage", containsString("nickname")));
     }
 
-//    @Test
-//    public void shouldThrowUserNotFoundTryingUpdateNotExistingUser() throws Exception {
-//        String nick = "testNick";
-//        UserController.UserDTO userDTO = UserController.UserDTO.builder()
-//                .name("testNameUpdated")
-//                .nick(nick)
-//                .build();
-//        String body = mapper.writeValueAsString(userDTO);
-//
-//        when(userService.updateUserName(nick, userDTO)).thenThrow(new UserNotFoundException(nick));
-//
-//        mockMvc.perform(put("/users/testNick")
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .content(body))
-//                .andDo(print())
-//                .andExpect(status().isNotFound())
-//                .andExpect(jsonPath("$.responseCode", equalTo(404)))
-//                .andExpect(jsonPath(
-//                        "$.exceptionMessage",
-//                        containsString(nick)));
-//    }
+    @Test
+    public void shouldThrowUserNotFoundTryingUpdateNotExistingUser() throws Exception {
+        String nickname = "testNickname";
+        UserController.UpdateUserDTO updateUserDTO = createUserForTestUpdate(1).build();
+        String body = mapper.writeValueAsString(updateUserDTO);
+
+        when(userService.updateUser(updateUserDTO)).thenThrow(new UserNotFoundException(nickname));
+
+        mockMvc.perform(put("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.responseCode", equalTo(404)))
+                .andExpect(jsonPath("$.exceptionMessage", containsString(nickname)));
+    }
 
 }

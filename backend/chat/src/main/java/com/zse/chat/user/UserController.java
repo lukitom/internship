@@ -47,7 +47,7 @@ public class UserController {
         return createUserResponseDTO(savedUser);
     }
 
-    @Operation(summary = "Change User name")
+    @Operation(summary = "Update User details")
     @PutMapping
     public UserResponseDTO updateUser(@RequestBody UpdateUserDTO updateUserDTO){
         User updatedUser = userService.updateUser(updateUserDTO);
