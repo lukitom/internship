@@ -80,7 +80,7 @@ public class MessageController {
     private MessageResponseDTO createMessageResponseDTO(Message message){
         return MessageResponseDTO.builder()
                 .id(message.getId())
-                .authorNick(message.getAuthor().getNick())
+                .authorNick(message.getAuthor().getNickname())
                 .content(message.getContent())
                 .createdAt(message.getCreatedAt())
                 .build();

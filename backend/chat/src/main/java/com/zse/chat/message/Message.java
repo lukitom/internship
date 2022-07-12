@@ -23,14 +23,14 @@ public class Message {
             strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator",
             parameters = {
                     @Parameter(name = "sequence_name", value = "message_sequence"),
-                    @Parameter(name = "initial value", value = "0"),
+                    @Parameter(name = "initial value", value = "1"),
                     @Parameter(name = "increment_size", value = "1")
             }
     )
     private final int id;
 
     @ManyToOne
-    @JoinColumn(name = "author_nick")
+    @JoinColumn(name = "nickname")
     private User author;
     private final String content;
     private final LocalDateTime createdAt;

@@ -1,9 +1,7 @@
 package com.zse.chat.message;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.zse.chat.user.User;
-import com.zse.chat.user.UserNotFoundException;
-import com.zse.chat.user.UserService;
+import com.zse.chat.user.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -14,6 +12,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TimeZone;
 
 import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.when;
@@ -25,7 +24,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(MessageController.class)
 class MessageControllerTest {
 
-    private final ObjectMapper mapper = new ObjectMapper();
+    @Autowired
+    private ObjectMapper mapper;
 
     @Autowired
     private MockMvc mockMvc;
@@ -35,12 +35,33 @@ class MessageControllerTest {
     @MockBean
     private UserService userService;
 
+    private User.UserBuilder createUserForTest(int number){
+        return User.builder()
+                .nickname("testNickname" + number)
+                .firstName("testFirstName" + number)
+                .lastName("testLastName" + number)
+                .email("testEmail" + number)
+                .country("testCountry" + number)
+                .city("testCity" + number)
+                .phoneNumber("testPhoneNumber" + number)
+
+                .userStatus(UserStatus.OFFLINE)
+                .userLanguage(User.Language.POLISH)
+                .timeZone(TimeZone.getTimeZone("Europe/Warsaw"))
+
+                .showFirstNameAndLastName(false)
+                .showEmail(false)
+                .showPhoneNumber(false)
+                .showAddress(false)
+                .deleted(false);
+    }
+
     @Test
     public void shouldReturnAllMessages() throws Exception {
         List<Message> messages = new ArrayList<>();
         List<User> users = new ArrayList<>();
-        users.add(new User(1, "testName1", "testNick1"));
-        users.add(new User(2, "testName2", "testNick2"));
+        users.add(createUserForTest(1).build());
+        users.add(createUserForTest(2).build());
         messages.add(new Message(1, users.get(0), "content1", LocalDateTime.now()));
         messages.add(new Message(2, users.get(1), "content2", LocalDateTime.now()));
         messages.add(new Message(3, users.get(0), "content3", LocalDateTime.now()));
@@ -55,7 +76,7 @@ class MessageControllerTest {
     }
 
     @Test
-    public void shouldReturnEmptyArryaOfMessages() throws Exception {
+    public void shouldReturnEmptyArrayOfMessages() throws Exception {
         List<Message> messages = new ArrayList<>();
 
         when(messageService.getAllMessages()).thenReturn(messages);
@@ -69,10 +90,8 @@ class MessageControllerTest {
     @Test
     public void shouldReturnMessageById() throws Exception {
         int id = 1;
-        Message message = new Message(
-                1,
-                new User(1, "testName", "testNick"),
-                "content1", LocalDateTime.now());
+        User user = createUserForTest(1).build();
+        Message message = new Message(1, user, "content1", LocalDateTime.now());
 
         when(messageService.getMessageById(id)).thenReturn(message);
 
@@ -80,7 +99,7 @@ class MessageControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", equalTo(id)))
-                .andExpect(jsonPath("$.authorNick", equalTo("testNick")))
+                .andExpect(jsonPath("$.authorNick", equalTo("testNickname1")))
                 .andExpect(jsonPath("$.content", equalTo("content1")));
     }
 
@@ -102,7 +121,7 @@ class MessageControllerTest {
     @Test
     public void shouldCreateMessage() throws Exception {
         String nick = "testNick";
-        User user = new User(1, "testName", "testNick");
+        User user = createUserForTest(1).build();
         var messageRequestDTO = MessageController.MessageRequestDTO.builder()
                 .authorNick(nick)
                 .content("content1")
@@ -119,13 +138,13 @@ class MessageControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", equalTo(1)))
-                .andExpect(jsonPath("$.authorNick", equalTo("testNick")))
+                .andExpect(jsonPath("$.authorNick", equalTo("testNickname1")))
                 .andExpect(jsonPath("$.content", equalTo("content1")));
     }
 
     @Test
     public void shouldThrowNotFoundUserWhenCreatingMessageForNonExistingUser() throws Exception {
-        String nick = "testNick";
+        String nick = "testNickname1";
         var messageRequestDTO = MessageController.MessageRequestDTO.builder()
                 .authorNick(nick)
                 .content("content1")
@@ -141,22 +160,18 @@ class MessageControllerTest {
                 .andDo(print())
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.responseCode", equalTo(404)))
-                .andExpect(jsonPath(
-                        "$.exceptionMessage",
-                        containsString(nick)));
+                .andExpect(jsonPath("$.exceptionMessage", containsString(nick)));
     }
 
     @Test
     public void shouldReturnUpdatedMessage() throws Exception {
         int id = 1;
         var messageRequesDTO = MessageController.MessageRequestDTO.builder()
-                .authorNick("nickTest")
+                .authorNick("testNickname1")
                 .content("content1Updated")
                 .build();
-        Message message = new Message(
-                1,
-                new User(1, "testName", "nickTest"),
-                "content1Updated", LocalDateTime.now());
+        User user = createUserForTest(1).build();
+        Message message = new Message(1, user, "content1Updated", LocalDateTime.now());
 
         String body = mapper.writeValueAsString(messageRequesDTO);
 
@@ -168,21 +183,22 @@ class MessageControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", equalTo(id)))
-                .andExpect(jsonPath("$.authorNick", equalTo("nickTest")))
+                .andExpect(jsonPath("$.authorNick", equalTo("testNickname1")))
                 .andExpect(jsonPath("$.content", equalTo("content1Updated")));
     }
 
     @Test
     public void shouldThrowMessageNotFoundWhenTryingUpdateNotExistingMessage() throws Exception {
         int id = 1;
-        var messageRequesDTO = MessageController.MessageRequestDTO.builder()
-                .authorNick("nickTest")
+        var messageRequestDTO = MessageController.MessageRequestDTO.builder()
+                .authorNick("testNickname1")
                 .content("content1Updated")
                 .build();
 
-        String body = mapper.writeValueAsString(messageRequesDTO);
+        String body = mapper.writeValueAsString(messageRequestDTO);
 
-        when(messageService.updateMessageById(id, messageRequesDTO)).thenThrow(new MessageNotFoundException(id));
+        when(messageService.updateMessageById(id, messageRequestDTO))
+                .thenThrow(new MessageNotFoundException(id));
 
         mockMvc.perform(put("/messages/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -190,9 +206,7 @@ class MessageControllerTest {
                 .andDo(print())
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.responseCode", equalTo(404)))
-                .andExpect(jsonPath(
-                        "$.exceptionMessage",
-                        containsString(String.valueOf(id))));
+                .andExpect(jsonPath("$.exceptionMessage", containsString(String.valueOf(id))));
     }
 
 }
