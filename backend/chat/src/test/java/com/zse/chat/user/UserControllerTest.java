@@ -1,12 +1,11 @@
 package com.zse.chat.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvFileSource;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -27,18 +26,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(UserController.class)
 class UserControllerTest {
-    private static final ObjectMapper mapper = new ObjectMapper();
 
     @Autowired
     private MockMvc mockMvc;
 
+    @Autowired
+    private ObjectMapper mapper;
+
     @MockBean
     private UserService userService;
-
-    @BeforeAll
-    static void configureMapper(){
-        mapper.registerModule(new Jdk8Module());
-    }
 
     private User.UserBuilder createUserForTest(int number){
         return User.builder()
@@ -51,8 +47,7 @@ class UserControllerTest {
                 .phoneNumber("testPhoneNumber" + number)
 
                 .userStatus(UserStatus.OFFLINE)
-                .userLanguage(Language.POLISH)
-                .contentLanguage(ContentLanguage.MY_LANGUAGE)
+                .userLanguage(User.Language.POLISH)
                 .timeZone(TimeZone.getTimeZone("Europe/Warsaw"))
 
                 .showFirstNameAndLastName(false)
@@ -71,8 +66,7 @@ class UserControllerTest {
                 .phoneNumber("testPhoneNumber" + 1)
                 .country("testCountry" + 1)
                 .city("testCity" + 1)
-                .language(Optional.of(Language.POLISH))
-                .contentLanguage(Optional.of(ContentLanguage.MY_LANGUAGE));
+                .language(Optional.of(User.Language.POLISH));
     }
 
     private UserController.UpdateUserDTO.UpdateUserDTOBuilder createUserForTestUpdate(int number){
@@ -83,8 +77,7 @@ class UserControllerTest {
                 .phoneNumber(Optional.of("testPhoneNumber" + number))
                 .country(Optional.of("testCountry" + number))
                 .city(Optional.of("testCity" + number))
-                .language(Optional.of(Language.POLISH))
-                .contentLanguage(Optional.of(ContentLanguage.MY_LANGUAGE))
+                .language(Optional.of(User.Language.POLISH))
 
                 .showFirstNameAndLastName(Optional.of(false))
                 .showEmail(Optional.of(false))
@@ -141,7 +134,7 @@ class UserControllerTest {
         User user = createUserForTest(1).build();
         String body = mapper.writeValueAsString(createUserDTO);
 
-        when(userService.saveUser(createUserDTO)).thenReturn(user);
+        when(userService.saveUser(ArgumentMatchers.any())).thenReturn(user);
 
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -163,7 +156,7 @@ class UserControllerTest {
                 .build();
         String body = mapper.writeValueAsString(createUserDTO);
 
-        when(userService.saveUser(createUserDTO)).thenThrow(new MissingPayloadFieldException(
+        when(userService.saveUser(ArgumentMatchers.any())).thenThrow(new MissingPayloadFieldException(
                 missingNickname ? "nickname": missingEmail ? "email" : null
         ));
 
@@ -198,7 +191,7 @@ class UserControllerTest {
         User user = createUserForTest(1).build();
         String body = mapper.writeValueAsString(updateUserDTO);
 
-        when(userService.updateUser(updateUserDTO)).thenReturn(user);
+        when(userService.updateUser(ArgumentMatchers.any())).thenReturn(user);
 
         mockMvc.perform(put("/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -229,7 +222,7 @@ class UserControllerTest {
                 .build();
         String body = mapper.writeValueAsString(updateUserDTO);
 
-        when(userService.updateUser(updateUserDTO)).thenReturn(user);
+        when(userService.updateUser(ArgumentMatchers.any())).thenReturn(user);
 
         mockMvc.perform(put("/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -275,7 +268,7 @@ class UserControllerTest {
                 .nickname(null).build();
         String body = mapper.writeValueAsString(updateUserDTO);
 
-        when(userService.updateUser(updateUserDTO))
+        when(userService.updateUser(ArgumentMatchers.any()))
                 .thenThrow(new MissingPayloadFieldException("nickname"));
 
         mockMvc.perform(put("/users")
@@ -293,7 +286,7 @@ class UserControllerTest {
         UserController.UpdateUserDTO updateUserDTO = createUserForTestUpdate(1).build();
         String body = mapper.writeValueAsString(updateUserDTO);
 
-        when(userService.updateUser(updateUserDTO)).thenThrow(new UserNotFoundException(nickname));
+        when(userService.updateUser(ArgumentMatchers.any())).thenThrow(new UserNotFoundException(nickname));
 
         mockMvc.perform(put("/users")
                         .contentType(MediaType.APPLICATION_JSON)

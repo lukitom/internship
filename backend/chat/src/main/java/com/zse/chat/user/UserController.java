@@ -3,14 +3,13 @@ package com.zse.chat.user;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Level;
 
 @Tag(name = "Users")
 @RequestMapping("/users")
@@ -79,30 +78,29 @@ public class UserController {
         private String phoneNumber;
         private String country;
         private String city;
-        private Optional<Language> language;
-        private Optional<ContentLanguage> contentLanguage;
+        private Optional<User.Language> language;
     }
 
     @Data
     @AllArgsConstructor
     @Builder
+    @FieldDefaults(level = AccessLevel.PRIVATE)
     static class UpdateUserDTO{
-        private String nickname;
+        String nickname;
 
-        private Optional<String> firstName;
-        private Optional<String> lastName;
-        private Optional<String> phoneNumber;
-        private Optional<String> country;
-        private Optional<String> city;
-        private Optional<Language> language;
-        private Optional<ContentLanguage> contentLanguage;
+        Optional<String> firstName;
+        Optional<String> lastName;
+        Optional<String> phoneNumber;
+        Optional<String> country;
+        Optional<String> city;
+        Optional<User.Language> language;
 
-        private Optional<Boolean> showFirstNameAndLastName;
-        private Optional<Boolean> showEmail;
-        private Optional<Boolean> showPhoneNumber;
-        private Optional<Boolean> showAddress;
+        Optional<Boolean> showFirstNameAndLastName;
+        Optional<Boolean> showEmail;
+        Optional<Boolean> showPhoneNumber;
+        Optional<Boolean> showAddress;
 
-        private Optional<Boolean> deleted;
+        Optional<Boolean> deleted;
     }
 
     private UserResponseDTO createUserResponseDTO(User user){

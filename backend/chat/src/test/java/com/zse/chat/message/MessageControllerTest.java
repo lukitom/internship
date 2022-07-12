@@ -24,7 +24,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(MessageController.class)
 class MessageControllerTest {
 
-    private final ObjectMapper mapper = new ObjectMapper();
+    @Autowired
+    private ObjectMapper mapper;
 
     @Autowired
     private MockMvc mockMvc;
@@ -45,8 +46,7 @@ class MessageControllerTest {
                 .phoneNumber("testPhoneNumber" + number)
 
                 .userStatus(UserStatus.OFFLINE)
-                .userLanguage(Language.POLISH)
-                .contentLanguage(ContentLanguage.MY_LANGUAGE)
+                .userLanguage(User.Language.POLISH)
                 .timeZone(TimeZone.getTimeZone("Europe/Warsaw"))
 
                 .showFirstNameAndLastName(false)

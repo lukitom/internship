@@ -2,6 +2,7 @@ package com.zse.chat.user;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -48,8 +49,7 @@ public class UserService {
                 .phoneNumber(createUserDTO.getPhoneNumber())
                 .country(createUserDTO.getCountry())
                 .city(createUserDTO.getCity())
-                .userLanguage(createUserDTO.getLanguage().orElse(Language.POLISH))
-                .contentLanguage(createUserDTO.getContentLanguage().orElse(ContentLanguage.MY_LANGUAGE))
+                .userLanguage(createUserDTO.getLanguage().orElse(User.Language.POLISH))
                 .timeZone(TimeZone.getTimeZone("Europe/Warsaw"))
                 .userStatus(UserStatus.OFFLINE)
                 .showFirstNameAndLastName(false)
@@ -68,7 +68,7 @@ public class UserService {
 
     public User updateUser(UserController.UpdateUserDTO updateUserDTO) {
         String nick = updateUserDTO.getNickname();
-        if (nick == null){
+        if (StringUtils.hasText(nick)){
             throw new MissingPayloadFieldException("nickname");
         }
         Optional<User> user = userRepository.findByNickname(nick);
@@ -86,7 +86,6 @@ public class UserService {
                 .country(updateUserDTO.getCountry().orElse(savedUser.getCountry()))
                 .city(updateUserDTO.getCity().orElse(savedUser.getCity()))
                 .userLanguage(updateUserDTO.getLanguage().orElse(savedUser.getUserLanguage()))
-                .contentLanguage(updateUserDTO.getContentLanguage().orElse(savedUser.getContentLanguage()))
                 .showFirstNameAndLastName(updateUserDTO.getShowFirstNameAndLastName()
                         .orElse(savedUser.getShowFirstNameAndLastName()))
                 .showEmail(updateUserDTO.getShowEmail().orElse(savedUser.getShowEmail()))
