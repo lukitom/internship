@@ -101,6 +101,8 @@ public class UserController {
         private Optional<Boolean> showEmail;
         private Optional<Boolean> showPhoneNumber;
         private Optional<Boolean> showAddress;
+
+        private Optional<Boolean> deleted;
     }
 
     private UserResponseDTO createUserResponseDTO(User user){

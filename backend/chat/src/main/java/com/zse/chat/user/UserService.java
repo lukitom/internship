@@ -23,13 +23,17 @@ public class UserService {
             throw new MissingPayloadFieldException("nickname");
         }
 
+        String email = createUserDTO.getEmail();
+        if (email == null){
+            throw new MissingPayloadFieldException("email");
+        }
+
         Optional<User> userInDB = userRepository.findByNickname(nickname);
 
         if (userInDB.isPresent()){
             throw new UserWithNickAlreadyExistsException(nickname);
         }
 
-        String email = createUserDTO.getEmail();
         Optional<User> userEmail = userRepository.findByEmail(email);
 
         if (userEmail.isPresent()){
@@ -52,6 +56,7 @@ public class UserService {
                 .showEmail(false)
                 .showPhoneNumber(false)
                 .showAddress(false)
+                .deleted(false)
                 .build();
 
         return userRepository.save(user);
@@ -87,6 +92,7 @@ public class UserService {
                 .showEmail(updateUserDTO.getShowEmail().orElse(savedUser.getShowEmail()))
                 .showPhoneNumber(updateUserDTO.getShowPhoneNumber().orElse(savedUser.getShowPhoneNumber()))
                 .showAddress(updateUserDTO.getShowAddress().orElse(savedUser.getShowAddress()))
+                .deleted(updateUserDTO.getDeleted().orElse(savedUser.getDeleted()))
                 .build();
 
         return userRepository.save(updatedUser);

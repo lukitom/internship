@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvFileSource;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -61,6 +62,19 @@ class UserControllerTest {
                 .deleted(false);
     }
 
+    private UserController.CreateUserDTO.CreateUserDTOBuilder createUserForTestCreate(int number) {
+        return UserController.CreateUserDTO.builder()
+                .nickname("testNickname" + 1)
+                .firstName("testFirstName" + 1)
+                .lastName("testLastName" + 1)
+                .email("testEmail" + 1)
+                .phoneNumber("testPhoneNumber" + 1)
+                .country("testCountry" + 1)
+                .city("testCity" + 1)
+                .language(Optional.of(Language.POLISH))
+                .contentLanguage(Optional.of(ContentLanguage.MY_LANGUAGE));
+    }
+
     private UserController.UpdateUserDTO.UpdateUserDTOBuilder createUserForTestUpdate(int number){
         return UserController.UpdateUserDTO.builder()
                 .nickname("testNickname" + number)
@@ -75,7 +89,9 @@ class UserControllerTest {
                 .showFirstNameAndLastName(Optional.of(false))
                 .showEmail(Optional.of(false))
                 .showPhoneNumber(Optional.of(false))
-                .showAddress(Optional.of(false));
+                .showAddress(Optional.of(false))
+
+                .deleted(Optional.of(false));
     }
 
     @Test
@@ -121,17 +137,7 @@ class UserControllerTest {
 
     @Test
     public void shouldCreateUser() throws Exception {
-        UserController.CreateUserDTO createUserDTO = UserController.CreateUserDTO.builder()
-                .nickname("testNickname1")
-                .firstName("testFirstName1")
-                .lastName("testLastName1")
-                .email("testEmail1")
-                .phoneNumber("testPhoneNumber1")
-                .country("testCountry1")
-                .city("testCity1")
-                .language(Optional.of(Language.POLISH))
-                .contentLanguage(Optional.of(ContentLanguage.MY_LANGUAGE))
-                .build();
+        UserController.CreateUserDTO createUserDTO = createUserForTestCreate(1).build();
         User user = createUserForTest(1).build();
         String body = mapper.writeValueAsString(createUserDTO);
 
@@ -145,17 +151,45 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.nickname", equalTo("testNickname1")));
     }
 
+    @ParameterizedTest(name = "missingNickname: {0}, missingEmail: {1}")
+    @CsvSource({"false, true", "true, false"})
+    public void shouldThrowMissingArgumentTryingCreateUserWithMissingArgument(
+            boolean missingNickname,
+            boolean missingEmail
+    ) throws Exception {
+        UserController.CreateUserDTO createUserDTO = createUserForTestCreate(1)
+                .nickname(missingNickname ? null : "testNickname1")
+                .nickname(missingEmail? null : "testEmail1")
+                .build();
+        String body = mapper.writeValueAsString(createUserDTO);
+
+        when(userService.saveUser(createUserDTO)).thenThrow(new MissingPayloadFieldException(
+                missingNickname ? "nickname": missingEmail ? "email" : null
+        ));
+
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.responseCode", equalTo(400)))
+                .andExpect(jsonPath("$.exceptionMessage", containsString(
+                        missingNickname ? "nickname" : missingEmail ? "email" : null
+                )));
+
+    }
+
     @Test
     public void shouldThrowNotExistingUserWhenTryToFindByNotExistingNick() throws Exception {
-        String nick = "testNick";
+        String nickname = "testNickname1";
 
-        when(userService.getUserByNick(nick)).thenThrow(new UserNotFoundException(nick));
+        when(userService.getUserByNick(nickname)).thenThrow(new UserNotFoundException(nickname));
 
-        mockMvc.perform(get("/users/" + nick))
+        mockMvc.perform(get("/users/" + nickname))
                 .andDo(print())
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.responseCode", equalTo(404)))
-                .andExpect(jsonPath("$.exceptionMessage", containsString(nick)));
+                .andExpect(jsonPath("$.exceptionMessage", containsString(nickname)));
     }
 
     @Test
