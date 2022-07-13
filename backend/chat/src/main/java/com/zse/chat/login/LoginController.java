@@ -2,15 +2,16 @@ package com.zse.chat.login;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.zse.chat.user.MissingPayloadFieldException;
 import com.zse.chat.user.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.env.Environment;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.sql.Date;
 import java.time.LocalDate;
-import java.util.HashMap;
 
 @Tag(name = "Login")
 @RequestMapping("/login")
@@ -28,12 +28,23 @@ public class LoginController {
 
     private final UserService userService;
     private final Environment env;
-    private final ObjectMapper mapper;
 
     @PostMapping
-    public String login(@RequestBody String body) throws JsonProcessingException {
-        JsonNode node = mapper.readTree(body);
-
+    @Operation(summary = "Get JWT valid for 7 days")
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            content = {
+                    @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            examples = {
+                                    @ExampleObject(
+                                            value = "{\"nickname\":\"string\"}",
+                                            summary = "Minimal request"
+                                    )
+                            }
+                    )
+            }
+    )
+    public String login(@RequestBody JsonNode node) {
         if (!node.has("nickname")){
             throw new MissingPayloadFieldException("nickname");
         }
