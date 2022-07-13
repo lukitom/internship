@@ -5,8 +5,12 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.zse.chat.user.UserNotFoundException;
 import com.zse.chat.user.UserService;
+import org.checkerframework.checker.units.qual.A;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -29,6 +33,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class LoginControllerTest {
 
     @Autowired
+    private ObjectMapper mapper;
+
+    @Autowired
     private MockMvc mockMvc;
 
     @Autowired
@@ -42,12 +49,15 @@ class LoginControllerTest {
         String nickname = "testNick1";
         String secret = env.getProperty("jwt.secret");
         JWTVerifier verifier = JWT.require(Algorithm.HMAC256(secret)).build();
+        ObjectNode node = mapper.createObjectNode();
+        node.put("nickname", nickname);
+        String body = node.toString();
 
         when(userService.getUserByNick(nickname)).thenReturn(null);
 
         MvcResult result = mockMvc.perform(post("/login")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content("{ \"nickname\": \"" + nickname + "\"}"))
+                    .content(body))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andReturn();

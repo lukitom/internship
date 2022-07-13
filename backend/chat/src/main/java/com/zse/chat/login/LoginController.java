@@ -2,6 +2,11 @@ package com.zse.chat.login;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.zse.chat.user.MissingPayloadFieldException;
 import com.zse.chat.user.UserService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -23,11 +28,16 @@ public class LoginController {
 
     private final UserService userService;
     private final Environment env;
+    private final ObjectMapper mapper;
 
     @PostMapping
-    public String login(@RequestBody HashMap<String, String> body){
-        //TODO: check if nickname is null and if true throw Exception
-        String nickname = body.get("nickname");
+    public String login(@RequestBody String body) throws JsonProcessingException {
+        JsonNode node = mapper.readTree(body);
+
+        if (!node.has("nickname")){
+            throw new MissingPayloadFieldException("nickname");
+        }
+        String nickname = node.get("nickname").asText();
 
         userService.getUserByNick(nickname);
 
