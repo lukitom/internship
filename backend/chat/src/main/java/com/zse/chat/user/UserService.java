@@ -68,7 +68,7 @@ public class UserService {
 
     public User updateUser(UserController.UpdateUserDTO updateUserDTO) {
         String nick = updateUserDTO.getNickname();
-        if (StringUtils.hasText(nick)){
+        if (!StringUtils.hasText(nick)){
             throw new MissingPayloadFieldException("nickname");
         }
         Optional<User> user = userRepository.findByNickname(nick);
