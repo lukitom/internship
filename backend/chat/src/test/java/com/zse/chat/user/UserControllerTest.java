@@ -36,6 +36,7 @@ class UserControllerTest {
     @MockBean
     private UserService userService;
 
+    //region fixture
     private User.UserBuilder createUserForTest(int number){
         return User.builder()
                 .nickname("testNickname" + number)
@@ -86,7 +87,9 @@ class UserControllerTest {
 
                 .deleted(Optional.of(false));
     }
+    //endregion
 
+    //region GET("/users")
     @Test
     public void shouldReturnAllUsers() throws Exception {
         List<User> users = new ArrayList<>();
@@ -114,7 +117,9 @@ class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(0)));
     }
+    //endregion
 
+    //region GET("/users/{nickname}")
     @Test
     public void shouldReturnUserByNicknameVisibleNickname() throws Exception {
         String nick = "testNickname1";
@@ -128,6 +133,21 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.nickname", equalTo(nick)));
     }
 
+    @Test
+    public void shouldThrowNotExistingUserWhenTryToFindByNotExistingNick() throws Exception {
+        String nickname = "testNickname1";
+
+        when(userService.getUserByNick(nickname)).thenThrow(new UserNotFoundException(nickname));
+
+        mockMvc.perform(get("/users/" + nickname))
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.responseCode", equalTo(404)))
+                .andExpect(jsonPath("$.exceptionMessage", containsString(nickname)));
+    }
+    //endregion
+
+    //region POST("/users")
     @Test
     public void shouldCreateUser() throws Exception {
         UserController.CreateUserDTO createUserDTO = createUserForTestCreate(1).build();
@@ -169,22 +189,44 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.exceptionMessage", containsString(
                         missingNickname ? "nickname" : missingEmail ? "email" : null
                 )));
-
     }
 
     @Test
-    public void shouldThrowNotExistingUserWhenTryToFindByNotExistingNick() throws Exception {
-        String nickname = "testNickname1";
+    public void shouldThrowUserWithNickExists() throws Exception {
+        UserController.CreateUserDTO createUserDTO = createUserForTestCreate(1).build();
+        String body = mapper.writeValueAsString(createUserDTO);
 
-        when(userService.getUserByNick(nickname)).thenThrow(new UserNotFoundException(nickname));
+        when(userService.saveUser(ArgumentMatchers.any()))
+                .thenThrow(new UserWithNickAlreadyExistsException("testNickname1"));
 
-        mockMvc.perform(get("/users/" + nickname))
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
                 .andDo(print())
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.responseCode", equalTo(404)))
-                .andExpect(jsonPath("$.exceptionMessage", containsString(nickname)));
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.responseCode", equalTo(400)))
+                .andExpect(jsonPath("$.exceptionMessage", containsString("testNickname1")));
     }
 
+    @Test
+    public void shouldThrowUserWithEmailExists() throws Exception {
+        UserController.CreateUserDTO createUserDTO = createUserForTestCreate(1).build();
+        String body = mapper.writeValueAsString(createUserDTO);
+
+        when(userService.saveUser(ArgumentMatchers.any()))
+                .thenThrow(new UserWithEmailAlreadyExistsExeption("testEmail1"));
+
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.responseCode", equalTo(400)))
+                .andExpect(jsonPath("$.exceptionMessage", containsString("testEmail1")));
+    }
+    //endregion
+
+    //region PUT("/users")
     @Test
     public void shouldUpdateUserDetailsFoundByNicknameVisibleNickname() throws Exception {
         UserController.UpdateUserDTO updateUserDTO = createUserForTestUpdate(1).build();
@@ -296,5 +338,6 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.responseCode", equalTo(404)))
                 .andExpect(jsonPath("$.exceptionMessage", containsString(nickname)));
     }
+    //endregion
 
 }
