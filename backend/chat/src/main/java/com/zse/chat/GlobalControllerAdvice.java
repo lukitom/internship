@@ -1,11 +1,12 @@
 package com.zse.chat;
 
+import com.zse.chat.login.InvalidJWTException;
+import com.zse.chat.login.MissingJWTException;
 import com.zse.chat.message.MessageNotFoundException;
 import com.zse.chat.user.MissingPayloadFieldException;
+import com.zse.chat.user.UserNotFoundException;
 import com.zse.chat.user.UserWithEmailAlreadyExistsExeption;
 import com.zse.chat.user.UserWithNickAlreadyExistsException;
-import com.zse.chat.user.UserNotFoundException;
-import io.swagger.v3.oas.annotations.extensions.Extension;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -42,6 +43,16 @@ public class GlobalControllerAdvice {
         return ExceptionResponse.builder()
                 .responseCode(HttpStatus.BAD_REQUEST.value())
                 .exceptionMessage(missingArgumentException.getMessage())
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
+
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ExceptionHandler({MissingJWTException.class, InvalidJWTException.class})
+    public ExceptionResponse requiredJWT(Exception exception){
+        return ExceptionResponse.builder()
+                .responseCode(HttpStatus.UNAUTHORIZED.value())
+                .exceptionMessage(exception.getMessage())
                 .timestamp(LocalDateTime.now())
                 .build();
     }
