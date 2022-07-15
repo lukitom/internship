@@ -1,6 +1,8 @@
 package com.zse.chat.message;
 
+import com.zse.chat.login.VerifyJWT;
 import com.zse.chat.user.User;
+import com.zse.chat.user.UserNickname;
 import com.zse.chat.user.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -43,8 +45,9 @@ public class MessageController {
 
     @Operation(summary = "Create new message")
     @PostMapping
+    @VerifyJWT
     public MessageResponseDTO createMessage(@RequestBody MessageRequestDTO messageRequestDTO){
-        User author = userService.getUserByNick(messageRequestDTO.getAuthorNick());
+        User author = userService.getUserByNick(messageRequestDTO.getNickname());
         Message savedMessage = messageService.sendMessage(messageRequestDTO, author);
 
         return  createMessageResponseDTO(savedMessage);
@@ -55,16 +58,18 @@ public class MessageController {
             parameters = {@Parameter(name = "id", description = "Message Id")}
     )
     @PutMapping("/{id}")
-    public MessageResponseDTO updateMessage(@PathVariable int id, @RequestBody MessageRequestDTO messageRequestDTO){
+    @VerifyJWT
+    public MessageResponseDTO updateMessage(@RequestBody MessageRequestDTO messageRequestDTO, @PathVariable int id){
         Message updatedMessage = messageService.updateMessageById(id, messageRequestDTO);
 
         return createMessageResponseDTO(updatedMessage);
     }
 
+    //region DTOs
     @Data
     @Builder
-    static class MessageRequestDTO {
-        private String authorNick;
+    static class MessageRequestDTO implements UserNickname {
+        private String nickname;
         private String content;
     }
 
@@ -76,6 +81,7 @@ public class MessageController {
         private String content;
         private LocalDateTime createdAt;
     }
+    //endregion
 
     private MessageResponseDTO createMessageResponseDTO(Message message){
         return MessageResponseDTO.builder()
