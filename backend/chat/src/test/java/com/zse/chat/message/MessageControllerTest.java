@@ -1,7 +1,10 @@
 package com.zse.chat.message;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.zse.chat.user.*;
+import com.zse.chat.user.User;
+import com.zse.chat.user.UserNotFoundException;
+import com.zse.chat.user.UserService;
+import com.zse.chat.user.UserStatus;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -138,7 +141,7 @@ class MessageControllerTest {
         String body = mapper.writeValueAsString(messageRequestDTO);
 
         when(userService.getUserByNick(nick)).thenReturn(user);
-        when(messageService.sendMessage(messageRequestDTO, user)).thenReturn(message);
+        when(messageService.saveMessage(messageRequestDTO, user)).thenReturn(message);
 
         mockMvc.perform(post("/messages")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -213,10 +216,10 @@ class MessageControllerTest {
         mockMvc.perform(put("/messages/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
-                .andDo(print());
-//                .andExpect(status().isNotFound())
-//                .andExpect(jsonPath("$.responseCode", equalTo(404)))
-//                .andExpect(jsonPath("$.exceptionMessage", containsString(String.valueOf(id))));
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.responseCode", equalTo(404)))
+                .andExpect(jsonPath("$.exceptionMessage", containsString(String.valueOf(id))));
     }
     //endregion
 

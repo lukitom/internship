@@ -21,7 +21,7 @@ public class MessageService {
         return messageRepository.findById(id).orElseThrow(() -> new MessageNotFoundException(id));
     }
 
-    public Message sendMessage(MessageController.MessageRequestDTO messageRequestDTO, User user) {
+    public Message saveMessage(MessageController.MessageRequestDTO messageRequestDTO, User user) {
         final Message newMessage = Message.builder()
                  .content(messageRequestDTO.getContent())
                  .author(user)

@@ -2,7 +2,7 @@ package com.zse.chat.message;
 
 
 import com.zse.chat.user.User;
-import com.zse.chat.user.UserStatus;
+import com.zse.chat.user.UserFixture;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,11 +11,9 @@ import org.mockito.ArgumentMatchers;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.TimeZone;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -37,33 +35,6 @@ class MessageServiceTest {
         messageService = new MessageService(messageRepository);
     }
 
-    private User.UserBuilder createUser(int number){
-        return User.builder()
-                .nickname("testNickname" + number)
-                .firstName("testFirstName" + number)
-                .lastName("testLastName" + number)
-                .email("testEmail" + number)
-                .phoneNumber("testPhoneNumber" + number)
-                .country("testCountry" + number)
-                .city("testCity" + number)
-                .userLanguage(User.Language.POLISH)
-                .timeZone(TimeZone.getTimeZone("Europe/Warsaw"))
-                .userStatus(UserStatus.OFFLINE)
-                .showFirstNameAndLastName(false)
-                .showEmail(false)
-                .showPhoneNumber(false)
-                .showAddress(false)
-                .deleted(false);
-    }
-
-    private Message.MessageBuilder createMessage(int number, User user){
-        return Message.builder()
-                .id(1)
-                .author(user)
-                .content("testContent" + number)
-                .createdAt(LocalDateTime.now());
-    }
-
     private MessageController.MessageRequestDTO.MessageRequestDTOBuilder createMessageRequest(
             int number, User user) {
         return MessageController.MessageRequestDTO.builder()
@@ -76,17 +47,17 @@ class MessageServiceTest {
     @Test
     public void shouldReturnListOfMessages(){
         List<User> users = new ArrayList<>();
-        users.add(createUser(1).build());
-        users.add(createUser(2).build());
-        users.add(createUser(3).build());
+        users.add(UserFixture.createDefaultUser(1).build());
+        users.add(UserFixture.createDefaultUser(2).build());
+        users.add(UserFixture.createDefaultUser(3).build());
 
         List<Message> messages = new ArrayList<>();
-        messages.add(createMessage(1, users.get(0)).build());
-        messages.add(createMessage(2, users.get(1)).build());
-        messages.add(createMessage(3, users.get(2)).build());
-        messages.add(createMessage(4, users.get(0)).build());
-        messages.add(createMessage(5, users.get(2)).build());
-        messages.add(createMessage(6, users.get(2)).build());
+        messages.add(MessageFixture.createDefaultMessage(1, users.get(0)).build());
+        messages.add(MessageFixture.createDefaultMessage(2, users.get(1)).build());
+        messages.add(MessageFixture.createDefaultMessage(3, users.get(2)).build());
+        messages.add(MessageFixture.createDefaultMessage(4, users.get(0)).build());
+        messages.add(MessageFixture.createDefaultMessage(5, users.get(2)).build());
+        messages.add(MessageFixture.createDefaultMessage(6, users.get(2)).build());
 
         when(messageRepository.findAllByOrderByIdAsc()).thenReturn(messages);
 
@@ -114,10 +85,10 @@ class MessageServiceTest {
     //region getMessageById()
     @Test
     public void shouldReturnMessageById(){
-        User user = createUser(1).build();
-        Message message = createMessage(1, user).build();
+        User user = UserFixture.createDefaultUser(1).build();
+        Message message = MessageFixture.createDefaultMessage(1, user).build();
 
-        when(messageRepository.findById(1)).thenReturn(Optional.ofNullable(message));
+        when(messageRepository.findById(1)).thenReturn(Optional.of(message));
 
         Message returned = messageService.getMessageById(1);
 
@@ -145,14 +116,14 @@ class MessageServiceTest {
 
     //region sendMessage()
     @Test
-    public void shouldSendMessage() {
-        User user = createUser(1).build();
+    public void shouldSaveMessage() {
+        User user = UserFixture.createDefaultUser(1).build();
         var messageRequestDTO = createMessageRequest(1, user).build();
 
         when(messageRepository.save(ArgumentMatchers.any(Message.class)))
                 .then(AdditionalAnswers.returnsFirstArg());
 
-        Message message = messageService.sendMessage(messageRequestDTO, user);
+        Message message = messageService.saveMessage(messageRequestDTO, user);
 
         assertThat(message, notNullValue());
         assertThat(message.getId(), notNullValue());
@@ -169,11 +140,11 @@ class MessageServiceTest {
     //region updateMessageById()
     @Test
     public void shouldUpdateMessage() {
-        User user = createUser(1).build();
-        Message message = createMessage(1, user).build();
+        User user = UserFixture.createDefaultUser(1).build();
+        Message message = MessageFixture.createDefaultMessage(1, user).build();
         var messageRequestDTO = createMessageRequest(1, user).build();
 
-        when(messageRepository.findById(1)).thenReturn(Optional.ofNullable(message));
+        when(messageRepository.findById(1)).thenReturn(Optional.of(message));
         when(messageRepository.save(ArgumentMatchers.any(Message.class)))
                 .then(AdditionalAnswers.returnsFirstArg());
 

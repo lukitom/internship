@@ -34,25 +34,6 @@ class UserServiceTest {
         userService = new UserService(userRepository);
     }
 
-    private User.UserBuilder createUser(int number){
-        return User.builder()
-                .nickname("testNickname" + number)
-                .firstName("testFirstName" + number)
-                .lastName("testLastName" + number)
-                .email("testEmail" + number)
-                .phoneNumber("testPhoneNumber" + number)
-                .country("testCountry" + number)
-                .city("testCity" + number)
-                .userLanguage(User.Language.POLISH)
-                .timeZone(TimeZone.getTimeZone("Europe/Warsaw"))
-                .userStatus(UserStatus.OFFLINE)
-                .showFirstNameAndLastName(false)
-                .showEmail(false)
-                .showPhoneNumber(false)
-                .showAddress(false)
-                .deleted(false);
-    }
-
     private UserController.CreateUserDTO.CreateUserDTOBuilder createUserDTOForTestCreate(int number){
         return UserController.CreateUserDTO.builder()
                 .nickname("testNickname" + number)
@@ -163,7 +144,7 @@ class UserServiceTest {
     @Test
     public void shouldThrowUserExistWithNickname(){
         UserController.CreateUserDTO createUserDTO = createUserDTOForTestCreate(1).build();
-        User user = createUser(1).build();
+        User user = UserFixture.createDefaultUser(1).build();
 
         when(userRepository.findByNickname("testNickname1")).thenReturn(Optional.of(user));
 
@@ -177,7 +158,7 @@ class UserServiceTest {
     @Test
     public void shouldThrowUserExistWithEmail(){
         UserController.CreateUserDTO createUserDTO = createUserDTOForTestCreate(1).build();
-        User user = createUser(1).build();
+        User user = UserFixture.createDefaultUser(1).build();
 
         when(userRepository.findByNickname("testNickname1")).thenReturn(Optional.empty());
         when(userRepository.findByEmail("testEmail1")).thenReturn(Optional.of(user));
@@ -195,10 +176,10 @@ class UserServiceTest {
     @Test
     public void shouldReturnListOfUsers(){
         List<User> users = new ArrayList<>();
-        users.add(createUser(1).build());
-        users.add(createUser(2).build());
-        users.add(createUser(3).build());
-        users.add(createUser(4).build());
+        users.add(UserFixture.createDefaultUser(1).build());
+        users.add(UserFixture.createDefaultUser(2).build());
+        users.add(UserFixture.createDefaultUser(3).build());
+        users.add(UserFixture.createDefaultUser(4).build());
 
         when(userRepository.findAll()).thenReturn(users);
 
@@ -227,7 +208,7 @@ class UserServiceTest {
     //region getUserByNick()
     @Test
     public void shouldReturnUserByNick(){
-        User user = createUser(1).build();
+        User user = UserFixture.createDefaultUser(1).build();
 
         when(userRepository.findByNickname("testNickname1")).thenReturn(Optional.of(user));
 
@@ -242,7 +223,7 @@ class UserServiceTest {
     @Test
     public void validateGetUserByNickname(){
         UserController.CreateUserDTO createUserDTO = createUserDTOForTestCreate(1).build();
-        User user = createUser(1).build();
+        User user = UserFixture.createDefaultUser(1).build();
 
         when(userRepository.findByNickname("testNickname1")).thenReturn(Optional.of(user));
 
@@ -286,7 +267,7 @@ class UserServiceTest {
     @Test
     public void shouldUpdateUser(){
         UserController.UpdateUserDTO updateUserDTO = createUserDTOForTestUpdate(1).build();
-        User user = createUser(1).build();
+        User user = UserFixture.createDefaultUser(1).build();
 
         when(userRepository.findByNickname("testNickname1")).thenReturn(Optional.of(user));
         when(userRepository.save(ArgumentMatchers.any(User.class))).then(AdditionalAnswers.returnsFirstArg());
@@ -303,7 +284,7 @@ class UserServiceTest {
     @Test
     public void validateReturnedUserFields(){
         UserController.UpdateUserDTO updateUserDTO = createUserDTOForTestUpdate(1).build();
-        User user = createUser(1).build();
+        User user = UserFixture.createDefaultUser(1).build();
 
         when(userRepository.findByNickname("testNickname1")).thenReturn(Optional.of(user));
         when(userRepository.save(ArgumentMatchers.any(User.class))).then(AdditionalAnswers.returnsFirstArg());
