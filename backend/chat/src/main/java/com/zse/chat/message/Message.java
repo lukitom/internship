@@ -10,7 +10,7 @@ import org.hibernate.annotations.Parameter;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
-@Entity(name = "messages")
+@Entity
 @Data
 @AllArgsConstructor
 @Builder
