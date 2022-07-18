@@ -1,5 +1,6 @@
 package com.zse.chat;
 
+import com.zse.chat.login.MessageUpdateFailedException;
 import com.zse.chat.login.InvalidJWTException;
 import com.zse.chat.login.MissingJWTException;
 import com.zse.chat.message.MessageNotFoundException;
@@ -54,6 +55,16 @@ public class GlobalControllerAdvice {
     public ExceptionResponse requiredJWT(Exception exception){
         return ExceptionResponse.builder()
                 .responseCode(HttpStatus.UNAUTHORIZED.value())
+                .exceptionMessage(exception.getMessage())
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
+
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ExceptionHandler(MessageUpdateFailedException.class)
+    public ExceptionResponse notOwnerTryingUpdateMessage(Exception exception){
+        return ExceptionResponse.builder()
+                .responseCode(HttpStatus.FORBIDDEN.value())
                 .exceptionMessage(exception.getMessage())
                 .timestamp(LocalDateTime.now())
                 .build();

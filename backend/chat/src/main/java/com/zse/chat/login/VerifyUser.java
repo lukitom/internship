@@ -6,6 +6,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.zse.chat.user.UserNickname;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -17,6 +18,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 
 @Aspect
 @Component
@@ -51,7 +53,13 @@ public class VerifyUser {
             Claim decodedClaims = decodedJWT.getClaims().get("nickname");
             String nickname = decodedClaims.asString();
 
-            return pjp.proceed(pjp.getArgs());
+            UserNickname arg = (UserNickname) pjp.getArgs()[0];
+            arg.setNickname(nickname);
+
+            Object[] args = pjp.getArgs();
+            args[0] = arg;
+
+            return pjp.proceed(args);
         } catch (JWTVerificationException e){
             throw new InvalidJWTException();
         }
