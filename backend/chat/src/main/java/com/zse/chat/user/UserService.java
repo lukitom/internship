@@ -96,4 +96,5 @@ public class UserService {
 
         return userRepository.save(updatedUser);
     }
+
 }

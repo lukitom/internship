@@ -5,12 +5,10 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.zse.chat.user.UserNotFoundException;
 import com.zse.chat.user.UserService;
-import org.checkerframework.checker.units.qual.A;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -44,9 +42,10 @@ class LoginControllerTest {
     @MockBean
     private UserService userService;
 
+    //region POST("/login")
     @Test
     public void shouldReturnCorrectJWTToken() throws Exception {
-        String nickname = "testNick1";
+        String nickname = "testNickname1";
         String secret = env.getProperty("jwt.secret");
         JWTVerifier verifier = JWT.require(Algorithm.HMAC256(secret)).build();
         ObjectNode node = mapper.createObjectNode();
@@ -71,7 +70,7 @@ class LoginControllerTest {
 
     @Test
     public void shouldThrowNotExistingUserByGivenNickname() throws Exception {
-        String nickname = "testNick1";
+        String nickname = "testNickname1";
 
         when(userService.getUserByNick(nickname)).thenThrow(new UserNotFoundException(nickname));
 
@@ -83,5 +82,18 @@ class LoginControllerTest {
                 .andExpect(jsonPath("$.responseCode", equalTo(404)))
                 .andExpect(jsonPath("$.exceptionMessage", containsString(nickname)));
     }
+
+    @Test
+    public void shouldThrownMissingArgumentNickname() throws Exception {
+        mockMvc.perform(post("/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.responseCode", equalTo(400)))
+                .andExpect(jsonPath("$.exceptionMessage", containsString("nickname")));
+    }
+
+    //endregion
 
 }
