@@ -134,7 +134,7 @@ class MessageControllerTest {
         String nick = "testNick";
         User user = createUserForTest(1).build();
         var messageRequestDTO = MessageController.MessageRequestDTO.builder()
-                .authorNick(nick)
+                .nickname(nick)
                 .content("content1")
                 .build();
         Message message = new Message(1, user, "content1", LocalDateTime.now());
@@ -157,7 +157,7 @@ class MessageControllerTest {
     public void shouldThrowNotFoundUserWhenCreatingMessageForNonExistingUser() throws Exception {
         String nick = "testNickname1";
         var messageRequestDTO = MessageController.MessageRequestDTO.builder()
-                .authorNick(nick)
+                .nickname(nick)
                 .content("content1")
                 .build();
 
@@ -180,7 +180,7 @@ class MessageControllerTest {
     public void shouldReturnUpdatedMessage() throws Exception {
         int id = 1;
         var messageRequesDTO = MessageController.MessageRequestDTO.builder()
-                .authorNick("testNickname1")
+                .nickname("testNickname1")
                 .content("content1Updated")
                 .build();
         User user = createUserForTest(1).build();
@@ -204,7 +204,7 @@ class MessageControllerTest {
     public void shouldThrowMessageNotFoundWhenTryingUpdateNotExistingMessage() throws Exception {
         int id = 1;
         var messageRequestDTO = MessageController.MessageRequestDTO.builder()
-                .authorNick("testNickname1")
+                .nickname("testNickname1")
                 .content("content1Updated")
                 .build();
 

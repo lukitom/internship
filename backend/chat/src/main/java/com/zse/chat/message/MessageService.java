@@ -1,5 +1,6 @@
 package com.zse.chat.message;
 
+import com.zse.chat.login.MessageUpdateFailedException;
 import com.zse.chat.user.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -32,6 +33,10 @@ public class MessageService {
 
     public Message updateMessageById(int id, MessageController.MessageRequestDTO messageRequestDTO) {
         Message previousMessage = getMessageById(id);
+
+        if (!messageRequestDTO.getNickname().equals(previousMessage.getAuthor().getNickname())){
+            throw new MessageUpdateFailedException();
+        }
 
         Message updatedMessage = Message.builder()
                 .id(previousMessage.getId())

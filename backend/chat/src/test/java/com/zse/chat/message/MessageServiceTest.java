@@ -38,7 +38,7 @@ class MessageServiceTest {
     private MessageController.MessageRequestDTO.MessageRequestDTOBuilder createMessageRequest(
             int number, User user) {
         return MessageController.MessageRequestDTO.builder()
-                .authorNick(user.getNickname())
+                .nickname(user.getNickname())
                 .content("testContent" + number);
     }
     //endregion
