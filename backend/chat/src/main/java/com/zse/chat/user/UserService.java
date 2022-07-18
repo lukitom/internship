@@ -85,7 +85,13 @@ public class UserService {
                 .phoneNumber(updateUserDTO.getPhoneNumber().orElse(savedUser.getPhoneNumber()))
                 .country(updateUserDTO.getCountry().orElse(savedUser.getCountry()))
                 .city(updateUserDTO.getCity().orElse(savedUser.getCity()))
+                .userStatus(updateUserDTO.getUserStatus().orElse(savedUser.getUserStatus()))
                 .userLanguage(updateUserDTO.getLanguage().orElse(savedUser.getUserLanguage()))
+                .timeZone(
+                        updateUserDTO.getTimeZone().isPresent() ?
+                                TimeZone.getTimeZone(updateUserDTO.getTimeZone().get()) :
+                                savedUser.getTimeZone()
+                )
                 .showFirstNameAndLastName(updateUserDTO.getShowFirstNameAndLastName()
                         .orElse(savedUser.getShowFirstNameAndLastName()))
                 .showEmail(updateUserDTO.getShowEmail().orElse(savedUser.getShowEmail()))

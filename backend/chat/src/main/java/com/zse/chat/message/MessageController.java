@@ -6,6 +6,7 @@ import com.zse.chat.user.UserNickname;
 import com.zse.chat.user.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.Builder;
 import lombok.Data;
@@ -46,6 +47,7 @@ public class MessageController {
     @Operation(summary = "Create new message")
     @PostMapping
     @VerifyJWT
+    @SecurityRequirement(name = "JWT")
     public MessageResponseDTO createMessage(@RequestBody MessageRequestDTO messageRequestDTO){
         User author = userService.getUserByNick(messageRequestDTO.getNickname());
         Message savedMessage = messageService.saveMessage(messageRequestDTO, author);
@@ -59,6 +61,7 @@ public class MessageController {
     )
     @PutMapping("/{id}")
     @VerifyJWT
+    @SecurityRequirement(name = "JWT")
     public MessageResponseDTO updateMessage(@RequestBody MessageRequestDTO messageRequestDTO, @PathVariable int id){
         Message updatedMessage = messageService.updateMessageById(id, messageRequestDTO);
 
