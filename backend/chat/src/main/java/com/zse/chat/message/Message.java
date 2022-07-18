@@ -10,7 +10,7 @@ import org.hibernate.annotations.Parameter;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
-@Entity(name = "messages")
+@Entity
 @Data
 @AllArgsConstructor
 @Builder
@@ -23,7 +23,7 @@ public class Message {
             strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator",
             parameters = {
                     @Parameter(name = "sequence_name", value = "message_sequence"),
-                    @Parameter(name = "initial value", value = "1"),
+                    @Parameter(name = "initial_value", value = "1"),
                     @Parameter(name = "increment_size", value = "1")
             }
     )
