@@ -1,6 +1,6 @@
 package com.zse.chat.message;
 
-import com.zse.chat.login.ForbiddenMessageUpdateUserIsNotOwnerException;
+import com.zse.chat.login.MessageUpdateFailedException;
 import com.zse.chat.user.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -35,7 +35,7 @@ public class MessageService {
         Message previousMessage = getMessageById(id);
 
         if (!messageRequestDTO.getNickname().equals(previousMessage.getAuthor().getNickname())){
-            throw new ForbiddenMessageUpdateUserIsNotOwnerException();
+            throw new MessageUpdateFailedException();
         }
 
         Message updatedMessage = Message.builder()

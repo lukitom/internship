@@ -1,6 +1,6 @@
 package com.zse.chat;
 
-import com.zse.chat.login.ForbiddenMessageUpdateUserIsNotOwnerException;
+import com.zse.chat.login.MessageUpdateFailedException;
 import com.zse.chat.login.InvalidJWTException;
 import com.zse.chat.login.MissingJWTException;
 import com.zse.chat.message.MessageNotFoundException;
@@ -59,7 +59,7 @@ public class GlobalControllerAdvice {
     }
 
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    @ExceptionHandler(ForbiddenMessageUpdateUserIsNotOwnerException.class)
+    @ExceptionHandler(MessageUpdateFailedException.class)
     public ExceptionResponse notOwnerTryingUpdateMessage(Exception exception){
         return ExceptionResponse.builder()
                 .responseCode(HttpStatus.FORBIDDEN.value())
