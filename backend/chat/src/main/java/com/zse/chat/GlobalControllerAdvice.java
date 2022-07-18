@@ -7,6 +7,8 @@ import com.zse.chat.user.MissingPayloadFieldException;
 import com.zse.chat.user.UserNotFoundException;
 import com.zse.chat.user.UserWithEmailAlreadyExistsExeption;
 import com.zse.chat.user.UserWithNickAlreadyExistsException;
+import lombok.Builder;
+import lombok.Data;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -55,5 +57,15 @@ public class GlobalControllerAdvice {
                 .exceptionMessage(exception.getMessage())
                 .timestamp(LocalDateTime.now())
                 .build();
+    }
+
+    @Data
+    @Builder
+    static class ExceptionResponse {
+
+        int responseCode;
+        String exceptionMessage;
+        LocalDateTime timestamp;
+
     }
 }
