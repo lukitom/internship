@@ -48,7 +48,7 @@ public class MessageController {
     @VerifyJWT
     public MessageResponseDTO createMessage(@RequestBody MessageRequestDTO messageRequestDTO){
         User author = userService.getUserByNick(messageRequestDTO.getNickname());
-        Message savedMessage = messageService.sendMessage(messageRequestDTO, author);
+        Message savedMessage = messageService.saveMessage(messageRequestDTO, author);
 
         return  createMessageResponseDTO(savedMessage);
     }
