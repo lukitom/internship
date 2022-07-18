@@ -1,7 +1,10 @@
 package com.zse.chat.message;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.zse.chat.user.*;
+import com.zse.chat.user.User;
+import com.zse.chat.user.UserNotFoundException;
+import com.zse.chat.user.UserService;
+import com.zse.chat.user.UserStatus;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -32,9 +35,11 @@ class MessageControllerTest {
 
     @MockBean
     private MessageService messageService;
+
     @MockBean
     private UserService userService;
 
+    //region fixture
     private User.UserBuilder createUserForTest(int number){
         return User.builder()
                 .nickname("testNickname" + number)
@@ -55,7 +60,9 @@ class MessageControllerTest {
                 .showAddress(false)
                 .deleted(false);
     }
+    //endregion
 
+    //region GET("/messages")
     @Test
     public void shouldReturnAllMessages() throws Exception {
         List<Message> messages = new ArrayList<>();
@@ -86,7 +93,9 @@ class MessageControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(0)));
     }
+    //endregion
 
+    //region GET("/messages/{id}")
     @Test
     public void shouldReturnMessageById() throws Exception {
         int id = 1;
@@ -117,7 +126,9 @@ class MessageControllerTest {
                         "$.exceptionMessage",
                         containsString(String.valueOf(id))));
     }
+    //endregion
 
+    //region POST("/messages")
     @Test
     public void shouldCreateMessage() throws Exception {
         String nick = "testNick";
@@ -130,7 +141,7 @@ class MessageControllerTest {
         String body = mapper.writeValueAsString(messageRequestDTO);
 
         when(userService.getUserByNick(nick)).thenReturn(user);
-        when(messageService.sendMessage(messageRequestDTO, user)).thenReturn(message);
+        when(messageService.saveMessage(messageRequestDTO, user)).thenReturn(message);
 
         mockMvc.perform(post("/messages")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -162,7 +173,9 @@ class MessageControllerTest {
                 .andExpect(jsonPath("$.responseCode", equalTo(404)))
                 .andExpect(jsonPath("$.exceptionMessage", containsString(nick)));
     }
+    //endregion
 
+    //region PUT("/messages{id}")
     @Test
     public void shouldReturnUpdatedMessage() throws Exception {
         int id = 1;
@@ -208,5 +221,6 @@ class MessageControllerTest {
                 .andExpect(jsonPath("$.responseCode", equalTo(404)))
                 .andExpect(jsonPath("$.exceptionMessage", containsString(String.valueOf(id))));
     }
+    //endregion
 
 }
