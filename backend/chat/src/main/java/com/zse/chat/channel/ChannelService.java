@@ -50,7 +50,7 @@ public class ChannelService {
 
         Channel updatedChannel = Channel.builder()
                 .id(previousChannel.getId())
-                .owners(previousChannel.getOwners())
+                .owners(owners)
                 .members(members)
                 .build();
 
