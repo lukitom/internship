@@ -1,5 +1,7 @@
 package com.zse.chat;
 
+import com.zse.chat.channel.ChannelNotFoundException;
+import com.zse.chat.channel.ChannelUpdateFailedException;
 import com.zse.chat.login.MessageUpdateFailedException;
 import com.zse.chat.login.InvalidJWTException;
 import com.zse.chat.login.MissingJWTException;
@@ -21,7 +23,7 @@ import java.time.LocalDateTime;
 public class GlobalControllerAdvice {
 
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ExceptionHandler({UserNotFoundException.class, MessageNotFoundException.class})
+    @ExceptionHandler({UserNotFoundException.class, MessageNotFoundException.class, ChannelNotFoundException.class})
     public ExceptionResponse notFoundExceptionHandle(Exception notFoundException){
         return ExceptionResponse.builder()
                 .responseCode(HttpStatus.NOT_FOUND.value())
@@ -61,7 +63,7 @@ public class GlobalControllerAdvice {
     }
 
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    @ExceptionHandler(MessageUpdateFailedException.class)
+    @ExceptionHandler({MessageUpdateFailedException.class, ChannelUpdateFailedException.class})
     public ExceptionResponse notOwnerTryingUpdateMessage(Exception exception){
         return ExceptionResponse.builder()
                 .responseCode(HttpStatus.FORBIDDEN.value())
