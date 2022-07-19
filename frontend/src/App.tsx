@@ -1,9 +1,18 @@
-import Hello from "./components/Hello";
+import Message from "./components/Message";
 
 function App() {
+
   return (
     <div className="App">
-      <Hello />
+      <div className="app-header">
+
+      </div>
+      <div className="app-section">
+        <Message />
+      </div>
+      <div className="app-footer">
+
+      </div>
     </div>
   );
 }
