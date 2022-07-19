@@ -3,6 +3,7 @@ package com.zse.chat.user;
 import com.zse.chat.login.VerifyJWT;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -40,6 +41,7 @@ public class UserController {
 
     @GetMapping("/details")
     @VerifyJWT
+    @SecurityRequirement(name = "JWT")
     public UserDetailResponseDTO getUserDetails(UserDetailRequestDTO userDetailRequestDTO){
         User user = userService.getUserByNick(userDetailRequestDTO.getNickname());
 
@@ -57,6 +59,7 @@ public class UserController {
     @Operation(summary = "Update User details")
     @PutMapping
     @VerifyJWT
+    @SecurityRequirement(name = "JWT")
     public UserResponseDTO updateUser(@RequestBody UpdateUserDTO updateUserDTO){
         User updatedUser = userService.updateUser(updateUserDTO);
 
@@ -105,7 +108,9 @@ public class UserController {
         Optional<String> phoneNumber;
         Optional<String> country;
         Optional<String> city;
+        Optional<UserStatus> userStatus;
         Optional<User.Language> language;
+        Optional<String> timeZone;
 
         Optional<Boolean> showFirstNameAndLastName;
         Optional<Boolean> showEmail;
