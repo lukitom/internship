@@ -51,7 +51,7 @@ public class UserService {
                 .city(createUserDTO.getCity())
                 .userLanguage(createUserDTO.getLanguage().orElse(User.Language.POLISH))
                 .timeZone(TimeZone.getTimeZone("Europe/Warsaw"))
-                .userStatus(UserStatus.OFFLINE)
+                .userStatus(User.UserStatus.OFFLINE)
                 .showFirstNameAndLastName(false)
                 .showEmail(false)
                 .showPhoneNumber(false)

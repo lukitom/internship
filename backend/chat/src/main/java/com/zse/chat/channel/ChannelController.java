@@ -10,27 +10,35 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Tag(name = "Channels")
-@RestController("/channel")
+@RequestMapping("/channels")
+@RestController
 @RequiredArgsConstructor
+@SecurityRequirement(name = "JWT")
 public class ChannelController {
 
     private final ChannelService channelService;
     private final UserService userService;
 
+
+    @Operation(summary = "Get available channels")
+    @GetMapping
+    @VerifyJWT
+    public List<ChannelResponseDTO> getAvailableChannels(ChannelRequestDTO channelRequestDTO){
+        List<Channel> channels = channelService.getChannels(channelRequestDTO);
+
+        return null;
+    }
+
     @Operation(summary = "Create new channel")
     @PostMapping
     @VerifyJWT
-    @SecurityRequirement(name = "JWT")
-    public ChannelResponseDTO createChannel(ChannelCreateDTO channelCreateDTO){
+    public ChannelResponseDTO createChannel(ChannelRequestDTO channelCreateDTO){
         User user = userService.getUserByNick(channelCreateDTO.getNickname());
         Channel channel = channelService.saveChannel(user);
 
@@ -40,10 +48,9 @@ public class ChannelController {
     @Operation(summary = "Add user to channel as member")
     @PostMapping("/member")
     @VerifyJWT
-    @SecurityRequirement(name = "JWT")
-    public ChannelResponseDTO addUserAsMember(@RequestBody ChannelUpdateDTO channelUpdateDTO){
-        User user = userService.getUserByNick(channelUpdateDTO.userNickname);
-        Channel channel = channelService.updateChannelMembers(channelUpdateDTO, user, false);
+    public ChannelResponseDTO addUserAsMember(@RequestBody ChannelRequestDTO channelRequestDTO){
+        User user = userService.getUserByNick(channelRequestDTO.userNickname);
+        Channel channel = channelService.updateChannelMembers(channelRequestDTO, user, false);
 
         return createChannelResponseDTO(channel);
     }
@@ -51,10 +58,9 @@ public class ChannelController {
     @Operation(summary = "Remove user from channel")
     @DeleteMapping("/member")
     @VerifyJWT
-    @SecurityRequirement(name = "JWT")
-    public ChannelResponseDTO removeUserFromChannel(@RequestBody ChannelUpdateDTO channelUpdateDTO){
-        User user = userService.getUserByNick(channelUpdateDTO.userNickname);
-        Channel channel = channelService.updateChannelMembers(channelUpdateDTO, user, true);
+    public ChannelResponseDTO removeUserFromChannel(@RequestBody ChannelRequestDTO channelRequestDTO){
+        User user = userService.getUserByNick(channelRequestDTO.userNickname);
+        Channel channel = channelService.updateChannelMembers(channelRequestDTO, user, true);
 
         return createChannelResponseDTO(channel);
     }
@@ -62,10 +68,9 @@ public class ChannelController {
     @Operation(summary = "Add new owner privilege")
     @PostMapping("/owner")
     @VerifyJWT
-    @SecurityRequirement(name = "JWT")
-    public ChannelResponseDTO addUserAsOwner(@RequestBody ChannelUpdateDTO channelUpdateDTO){
-        User user = userService.getUserByNick(channelUpdateDTO.userNickname);
-        Channel channel = channelService.updateChannelOwners(channelUpdateDTO, user, false);
+    public ChannelResponseDTO addUserAsOwner(@RequestBody ChannelRequestDTO channelRequestDTO){
+        User user = userService.getUserByNick(channelRequestDTO.userNickname);
+        Channel channel = channelService.updateChannelOwners(channelRequestDTO, user, false);
 
         return createChannelResponseDTO(channel);
     }
@@ -73,10 +78,9 @@ public class ChannelController {
     @Operation(summary = "Remove owner privilege")
     @DeleteMapping("/owner")
     @VerifyJWT
-    @SecurityRequirement(name = "JWT")
-    public ChannelResponseDTO removeUserOwnerPrivilege(@RequestBody ChannelUpdateDTO channelUpdateDTO){
-        User user = userService.getUserByNick(channelUpdateDTO.userNickname);
-        Channel channel = channelService.updateChannelOwners(channelUpdateDTO, user, true);
+    public ChannelResponseDTO removeUserOwnerPrivilege(@RequestBody ChannelRequestDTO channelRequestDTO){
+        User user = userService.getUserByNick(channelRequestDTO.userNickname);
+        Channel channel = channelService.updateChannelOwners(channelRequestDTO, user, true);
 
         return createChannelResponseDTO(channel);
     }
@@ -84,15 +88,8 @@ public class ChannelController {
     //region DTOs
     @Data
     @Builder
-    static class ChannelCreateDTO implements UserNickname{
-        String nickname;
-    }
-
-
-    @Data
-    @Builder
-    static class ChannelUpdateDTO implements UserNickname {
-        int id;
+    static class ChannelRequestDTO implements UserNickname {
+        Integer id;
         String nickname;
         String userNickname;
     }
@@ -111,7 +108,7 @@ public class ChannelController {
         List<String> members = new ArrayList<>();
 
         channel.getOwners().forEach(user -> {
-            String userDTO = user.getNickname();
+            String userDTO  = user.getNickname();
             owners.add(userDTO);
         });
 

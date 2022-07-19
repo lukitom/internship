@@ -23,7 +23,11 @@ import java.time.LocalDateTime;
 public class GlobalControllerAdvice {
 
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ExceptionHandler({UserNotFoundException.class, MessageNotFoundException.class, ChannelNotFoundException.class})
+    @ExceptionHandler({
+            UserNotFoundException.class,
+            MessageNotFoundException.class,
+            ChannelNotFoundException.class
+    })
     public ExceptionResponse notFoundExceptionHandle(Exception notFoundException){
         return ExceptionResponse.builder()
                 .responseCode(HttpStatus.NOT_FOUND.value())

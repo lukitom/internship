@@ -1,17 +1,17 @@
 package com.zse.chat.user;
 
+import com.zse.chat.channel.Channel;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
+import java.util.List;
 import java.util.TimeZone;
 
 @Entity(name = "chat_user")
@@ -45,6 +45,10 @@ public class User {
     Language userLanguage;
     TimeZone timeZone;
 
+    @ManyToMany(mappedBy = "members")
+    @NonFinal List<Channel> channelsMember;
+    @ManyToMany(mappedBy = "owners")
+    @NonFinal List<Channel> channelsOwner;
 
     Boolean showFirstNameAndLastName;
     Boolean showEmail;
@@ -66,6 +70,7 @@ public class User {
         this.userLanguage = Language.POLISH;
         this.timeZone = TimeZone.getTimeZone("Europe/Warsaw");
 
+
         this.deleted = false;
         this.showFirstNameAndLastName = false;
         this.showEmail = false;
@@ -75,6 +80,10 @@ public class User {
 
     public enum Language {
         POLISH, ENGLISH, GERMAN
+    }
+
+    public enum UserStatus {
+        OFFLINE, ONLINE
     }
 
 }

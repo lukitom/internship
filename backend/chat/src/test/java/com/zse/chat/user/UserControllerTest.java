@@ -47,7 +47,7 @@ class UserControllerTest {
                 .city("testCity" + number)
                 .phoneNumber("testPhoneNumber" + number)
 
-                .userStatus(UserStatus.OFFLINE)
+                .userStatus(User.UserStatus.OFFLINE)
                 .userLanguage(User.Language.POLISH)
                 .timeZone(TimeZone.getTimeZone("Europe/Warsaw"))
 

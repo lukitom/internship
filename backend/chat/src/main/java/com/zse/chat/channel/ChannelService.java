@@ -14,6 +14,10 @@ public class ChannelService {
 
     private final ChannelRepository channelRepository;
 
+    public List<Channel> getChannels(ChannelController.ChannelRequestDTO channelRequestDTO) {
+        return channelRepository.getAvailableChannelsByUser(channelRequestDTO.nickname);
+    }
+
     public Channel findChannelById(int id){
         return channelRepository.findById(id).orElseThrow(() -> new ChannelNotFoundException(id));
     }
@@ -31,10 +35,10 @@ public class ChannelService {
         return channelRepository.save(channel);
     }
 
-    public Channel updateChannelMembers(ChannelController.ChannelUpdateDTO channelUpdateDTO, User user, boolean delete) {
-        Channel previousChannel = findChannelById(channelUpdateDTO.getId());
+    public Channel updateChannelMembers(ChannelController.ChannelRequestDTO channelRequestDTO, User user, boolean delete) {
+        Channel previousChannel = findChannelById(channelRequestDTO.getId());
 
-        previousChannel.getOwners().stream().filter(e -> Objects.equals(e.getNickname(), channelUpdateDTO.getNickname()))
+        previousChannel.getOwners().stream().filter(e -> Objects.equals(e.getNickname(), channelRequestDTO.getNickname()))
                 .findFirst().orElseThrow(ChannelUpdateFailedException::new);
 
         List<User> owners = previousChannel.getOwners();
@@ -57,10 +61,10 @@ public class ChannelService {
         return channelRepository.save(updatedChannel);
     }
 
-    public Channel updateChannelOwners(ChannelController.ChannelUpdateDTO channelUpdateDTO, User user, boolean delete) {
-        Channel previousChannel = findChannelById(channelUpdateDTO.getId());
+    public Channel updateChannelOwners(ChannelController.ChannelRequestDTO channelRequestDTO, User user, boolean delete) {
+        Channel previousChannel = findChannelById(channelRequestDTO.getId());
 
-        previousChannel.getOwners().stream().filter(e -> Objects.equals(e.getNickname(), channelUpdateDTO.getNickname()))
+        previousChannel.getOwners().stream().filter(e -> Objects.equals(e.getNickname(), channelRequestDTO.getNickname()))
                 .findFirst().orElseThrow(ChannelUpdateFailedException::new);
 
         List<User> owners = previousChannel.getOwners();
@@ -81,5 +85,4 @@ public class ChannelService {
 
         return channelRepository.save(updatedChannel);
     }
-
 }
