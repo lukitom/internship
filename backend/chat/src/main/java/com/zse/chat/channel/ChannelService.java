@@ -13,8 +13,12 @@ public class ChannelService {
 
     private final ChannelRepository channelRepository;
 
-    public List<Channel> getChannels(ChannelController.ChannelRequestDTO channelRequestDTO) {
-        return channelRepository.getAvailableChannelsByUser(channelRequestDTO.nickname);
+    public List<Channel> getChannels(User user) {
+        return channelRepository.getChannelsByOwnersInOrMembersIn(List.of(user), List.of(user));
+    }
+
+    public Channel getChannelById(int id){
+        return channelRepository.findById(id).orElseThrow(() -> new ChannelNotFoundException(id));
     }
 
     public Channel findChannelById(int id){
@@ -30,36 +34,36 @@ public class ChannelService {
         return channelRepository.save(channel);
     }
 
-    public Channel updateChannel(ChannelController.ChannelRequestDTO channelRequestDTO, User user, ChannelController.ChannelUpdateAction action){
-        Channel previousChannelValue = findChannelById(channelRequestDTO.getId());
-
-        previousChannelValue.getOwners().stream().filter(e -> Objects.equals(e.getNickname(), channelRequestDTO.getNickname()))
+    public void userHasPermissionToUpdateChannel(Channel channel, User user){
+        channel.getOwners()
+                .stream().filter(owner -> Objects.equals(owner.getNickname(), user.getNickname()))
                 .findFirst().orElseThrow(ChannelUpdateFailedException::new);
+    }
 
-        List<User> owners = previousChannelValue.getOwners();
-        List<User> members = previousChannelValue.getMembers();
+    public Channel updateChannel(Channel channel, ChannelUpdateAction action, User manipulateUser){
+        List<User> owners = channel.getOwners();
+        List<User> members = channel.getMembers();
 
         switch (action){
             case ADD_OWNER -> {
-                owners.add(user);
-                members.remove(user);
+                owners.add(manipulateUser);
+                members.remove(manipulateUser);
             }
             case REMOVE_OWNER -> {
-                owners.remove(user);
-                members.add(user);
+                owners.remove(manipulateUser);
+                members.add(manipulateUser);
             }
             case ADD_MEMBER -> {
-                if(owners.contains(user)){
-                    return previousChannelValue;
+                if(owners.contains(manipulateUser)){
+                    return channel;
                 }
-                members.add(user);
+                members.add(manipulateUser);
             }
-            case REMOVE_MEMBER -> members.remove(user);
+            case REMOVE_MEMBER -> members.remove(manipulateUser);
         }
 
-
         Channel updatedChannel = Channel.builder()
-                .id(previousChannelValue.getId())
+                .id(channel.getId())
                 .owners(owners)
                 .members(members)
                 .build();

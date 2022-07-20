@@ -6,11 +6,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
-import lombok.experimental.NonFinal;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
 
@@ -45,10 +45,10 @@ public class User {
     Language userLanguage;
     TimeZone timeZone;
 
-    @ManyToMany(mappedBy = "members")
-    @NonFinal List<Channel> channelsMember;
     @ManyToMany(mappedBy = "owners")
-    @NonFinal List<Channel> channelsOwner;
+    List<Channel> channelsOwner;
+    @ManyToMany(mappedBy = "members")
+    List<Channel> channelsMember;
 
     Boolean showFirstNameAndLastName;
     Boolean showEmail;
@@ -69,7 +69,8 @@ public class User {
         this.userStatus = UserStatus.OFFLINE;
         this.userLanguage = Language.POLISH;
         this.timeZone = TimeZone.getTimeZone("Europe/Warsaw");
-
+        this.channelsOwner = new ArrayList<>();
+        this.channelsMember = new ArrayList<>();
 
         this.deleted = false;
         this.showFirstNameAndLastName = false;

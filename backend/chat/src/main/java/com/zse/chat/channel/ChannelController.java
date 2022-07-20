@@ -7,12 +7,13 @@ import com.zse.chat.user.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Tag(name = "Channels")
@@ -30,9 +31,11 @@ public class ChannelController {
     @GetMapping
     @VerifyJWT
     public List<ChannelResponseDTO> getAvailableChannels(ChannelRequestDTO channelRequestDTO){
-        List<Channel> channels = channelService.getChannels(channelRequestDTO);
+        final var user = userService.getUserByNick(channelRequestDTO.getNickname());
+        final var channels = channelService.getChannels(user);
 
-        return null;
+        return channels.stream()
+                .map(this::createChannelResponseDTO).toList();
     }
 
     @Operation(summary = "Create new channel")
@@ -45,57 +48,35 @@ public class ChannelController {
         return createChannelResponseDTO(channel);
     }
 
-    @Operation(summary = "Add user to channel as member")
-    @PostMapping("/member")
+    @Operation(summary = "Update users who have access to the channel and their permissions")
+    @PutMapping("/users")
     @VerifyJWT
-    public ChannelResponseDTO addUserAsMember(@RequestBody ChannelRequestDTO channelRequestDTO){
-        final var user = userService.getUserByNick(channelRequestDTO.userNickname);
-        final var channel = channelService.updateChannel(channelRequestDTO, user, ChannelUpdateAction.ADD_MEMBER);
+    public ChannelResponseDTO updateChannelUsers(@RequestBody ChannelRequestDTO channelRequestDTO){
+        final var userToManipulate = userService.getUserByNick(channelRequestDTO.getUserNickname());
+        final var userRequesting = userService.getUserByNick(channelRequestDTO.getNickname());
+        var channel = channelService.getChannelById(channelRequestDTO.getId());
 
-        return createChannelResponseDTO(channel);
-    }
+        channelService.userHasPermissionToUpdateChannel(channel, userRequesting);
 
-    @Operation(summary = "Remove user from channel")
-    @DeleteMapping("/member")
-    @VerifyJWT
-    public ChannelResponseDTO removeUserFromChannel(@RequestBody ChannelRequestDTO channelRequestDTO){
-        final var user = userService.getUserByNick(channelRequestDTO.userNickname);
-        final var channel = channelService.updateChannel(channelRequestDTO, user, ChannelUpdateAction.REMOVE_MEMBER);
+        final var updatedChannel = channelService.updateChannel(channel, channelRequestDTO.getAction(), userToManipulate);
 
-        return createChannelResponseDTO(channel);
-    }
-
-    @Operation(summary = "Add new owner privilege")
-    @PostMapping("/owner")
-    @VerifyJWT
-    public ChannelResponseDTO addUserAsOwner(@RequestBody ChannelRequestDTO channelRequestDTO){
-        final var user = userService.getUserByNick(channelRequestDTO.userNickname);
-        final var channel = channelService.updateChannel(channelRequestDTO, user, ChannelUpdateAction.ADD_OWNER);
-
-        return createChannelResponseDTO(channel);
-    }
-
-    @Operation(summary = "Remove owner privilege")
-    @DeleteMapping("/owner")
-    @VerifyJWT
-    public ChannelResponseDTO removeUserOwnerPrivilege(@RequestBody ChannelRequestDTO channelRequestDTO){
-        final var user = userService.getUserByNick(channelRequestDTO.userNickname);
-        final var channel = channelService.updateChannel(channelRequestDTO, user, ChannelUpdateAction.REMOVE_OWNER);
-
-        return createChannelResponseDTO(channel);
+        return createChannelResponseDTO(updatedChannel);
     }
 
     //region DTOs
     @Data
     @Builder
+    @FieldDefaults(level = AccessLevel.PRIVATE)
     static class ChannelRequestDTO implements UserNickname {
         Integer id;
         String nickname;
         String userNickname;
+        ChannelUpdateAction action;
     }
 
     @Data
     @Builder
+    @FieldDefaults(level = AccessLevel.PRIVATE)
     static class ChannelResponseDTO {
         int id;
         List<String> owners;
@@ -109,10 +90,6 @@ public class ChannelController {
                 .owners(channel.getOwners().stream().map(User::getNickname).toList())
                 .members(channel.getMembers().stream().map(User::getNickname).toList())
                 .build();
-    }
-
-    enum ChannelUpdateAction {
-        ADD_OWNER, REMOVE_OWNER, ADD_MEMBER, REMOVE_MEMBER
     }
 
 }
