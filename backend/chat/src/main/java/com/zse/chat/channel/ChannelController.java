@@ -52,12 +52,15 @@ public class ChannelController {
     @PutMapping("/users")
     @VerifyJWT
     public ChannelResponseDTO updateChannelUsers(@RequestBody ChannelRequestDTO channelRequestDTO){
-        final var userToManipulate = userService.getUserByNick(channelRequestDTO.getUserNickname());
-        final var userRequesting = userService.getUserByNick(channelRequestDTO.getNickname());
         var channel = channelService.getChannelById(channelRequestDTO.getId());
 
-        channelService.userHasPermissionToUpdateChannel(channel, userRequesting);
+        boolean hasPermission = channelService.userHasPermissionToUpdateChannel(channel, channelRequestDTO.getUserNickname());
 
+        if (!hasPermission){
+            throw new ChannelUpdateFailedException();
+        }
+
+        final var userToManipulate = userService.getUserByNick(channelRequestDTO.getUserNickname());
         final var updatedChannel = channelService.updateChannel(channel, channelRequestDTO.getAction(), userToManipulate);
 
         return createChannelResponseDTO(updatedChannel);

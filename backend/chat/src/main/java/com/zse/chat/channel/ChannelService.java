@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Objects;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -34,10 +34,12 @@ public class ChannelService {
         return channelRepository.save(channel);
     }
 
-    public void userHasPermissionToUpdateChannel(Channel channel, User user){
-        channel.getOwners()
-                .stream().filter(owner -> Objects.equals(owner.getNickname(), user.getNickname()))
-                .findFirst().orElseThrow(ChannelUpdateFailedException::new);
+    public boolean userHasPermissionToUpdateChannel(Channel channel, String nickname){
+        Optional<User> resultOwner = channel.getOwners()
+                .stream().filter(owner -> owner.getNickname().equals(nickname))
+                .findFirst();
+
+        return resultOwner.isPresent();
     }
 
     public Channel updateChannel(Channel channel, ChannelUpdateAction action, User manipulateUser){
