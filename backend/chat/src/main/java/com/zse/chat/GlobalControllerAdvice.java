@@ -68,7 +68,7 @@ public class GlobalControllerAdvice {
 
     @ResponseStatus(HttpStatus.FORBIDDEN)
     @ExceptionHandler({MessageUpdateFailedException.class, ChannelUpdateFailedException.class})
-    public ExceptionResponse notOwnerTryingUpdateMessage(Exception exception){
+    public ExceptionResponse updateForbidden(Exception exception){
         return ExceptionResponse.builder()
                 .responseCode(HttpStatus.FORBIDDEN.value())
                 .exceptionMessage(exception.getMessage())

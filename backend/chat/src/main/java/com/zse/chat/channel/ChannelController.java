@@ -39,8 +39,8 @@ public class ChannelController {
     @PostMapping
     @VerifyJWT
     public ChannelResponseDTO createChannel(ChannelRequestDTO channelCreateDTO){
-        User user = userService.getUserByNick(channelCreateDTO.getNickname());
-        Channel channel = channelService.saveChannel(user);
+        final var user = userService.getUserByNick(channelCreateDTO.getNickname());
+        final var channel = channelService.saveChannel(user);
 
         return createChannelResponseDTO(channel);
     }
@@ -49,8 +49,8 @@ public class ChannelController {
     @PostMapping("/member")
     @VerifyJWT
     public ChannelResponseDTO addUserAsMember(@RequestBody ChannelRequestDTO channelRequestDTO){
-        User user = userService.getUserByNick(channelRequestDTO.userNickname);
-        Channel channel = channelService.updateChannelMembers(channelRequestDTO, user, false);
+        final var user = userService.getUserByNick(channelRequestDTO.userNickname);
+        final var channel = channelService.updateChannel(channelRequestDTO, user, ChannelUpdateAction.ADD_MEMBER);
 
         return createChannelResponseDTO(channel);
     }
@@ -59,8 +59,8 @@ public class ChannelController {
     @DeleteMapping("/member")
     @VerifyJWT
     public ChannelResponseDTO removeUserFromChannel(@RequestBody ChannelRequestDTO channelRequestDTO){
-        User user = userService.getUserByNick(channelRequestDTO.userNickname);
-        Channel channel = channelService.updateChannelMembers(channelRequestDTO, user, true);
+        final var user = userService.getUserByNick(channelRequestDTO.userNickname);
+        final var channel = channelService.updateChannel(channelRequestDTO, user, ChannelUpdateAction.REMOVE_MEMBER);
 
         return createChannelResponseDTO(channel);
     }
@@ -69,8 +69,8 @@ public class ChannelController {
     @PostMapping("/owner")
     @VerifyJWT
     public ChannelResponseDTO addUserAsOwner(@RequestBody ChannelRequestDTO channelRequestDTO){
-        User user = userService.getUserByNick(channelRequestDTO.userNickname);
-        Channel channel = channelService.updateChannelOwners(channelRequestDTO, user, false);
+        final var user = userService.getUserByNick(channelRequestDTO.userNickname);
+        final var channel = channelService.updateChannel(channelRequestDTO, user, ChannelUpdateAction.ADD_OWNER);
 
         return createChannelResponseDTO(channel);
     }
@@ -79,8 +79,8 @@ public class ChannelController {
     @DeleteMapping("/owner")
     @VerifyJWT
     public ChannelResponseDTO removeUserOwnerPrivilege(@RequestBody ChannelRequestDTO channelRequestDTO){
-        User user = userService.getUserByNick(channelRequestDTO.userNickname);
-        Channel channel = channelService.updateChannelOwners(channelRequestDTO, user, true);
+        final var user = userService.getUserByNick(channelRequestDTO.userNickname);
+        final var channel = channelService.updateChannel(channelRequestDTO, user, ChannelUpdateAction.REMOVE_OWNER);
 
         return createChannelResponseDTO(channel);
     }
@@ -104,24 +104,15 @@ public class ChannelController {
     //endregion
 
     private ChannelResponseDTO createChannelResponseDTO(Channel channel){
-        List<String> owners = new ArrayList<>();
-        List<String> members = new ArrayList<>();
-
-        channel.getOwners().forEach(user -> {
-            String userDTO  = user.getNickname();
-            owners.add(userDTO);
-        });
-
-        channel.getMembers().forEach(user -> {
-            String userDTO = user.getNickname();
-            members.add(userDTO);
-        });
-
         return ChannelResponseDTO.builder()
                 .id(channel.id)
-                .owners(owners)
-                .members(members)
+                .owners(channel.getOwners().stream().map(User::getNickname).toList())
+                .members(channel.getMembers().stream().map(User::getNickname).toList())
                 .build();
+    }
+
+    enum ChannelUpdateAction {
+        ADD_OWNER, REMOVE_OWNER, ADD_MEMBER, REMOVE_MEMBER
     }
 
 }
