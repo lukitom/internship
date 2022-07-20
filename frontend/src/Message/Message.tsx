@@ -1,81 +1,65 @@
 const mes = [
     {
-        Author: 'Michal',
-        message1: 'Hej',
-        message2: 'Co porabiasz?',
-        message3: 'Co robisz?',
-        message4: 'Jakie danie dzisiaj jadłeś?',
-        message5: 'Chcesz pograć?',
-        message6: 'Wyskoczysz z nami do parku?',
-        message7: 'Ide do kina',
-        message8: 'Jestem w sklepie',
-        Cdata: '20.07.2022',
+        id: 1,
+        authorNick: 'Krystian',
+        content: 'Cześć.',
+        createdAt: '20.07.2022',
+    },
+    {
+        id: 2,
+        authorNick: 'Kuba',
+        content: 'Hej.',
+        createdAt: '20.07.2022',
+    },
+    {
+        id: 3,
+        authorNick: 'Krystian',
+        content: 'Co robisz?',
+        createdAt: '20.07.2022',
+    },
+    {
+        id: 4,
+        authorNick: 'Kuba',
+        content: 'Piszę kod w React.',
+        createdAt: '20.07.2022',
+    },
+    {
+        id: 5,
+        authorNick: 'Kuba',
+        content: 'A ty co robisz?',
+        createdAt: '20.07.2022',
+    },
+    {
+        id: 6,
+        authorNick: 'Kuba',
+        content: 'Gram w gry.',
+        createdAt: '20.07.2022',
+    },
+    {
+        id: 7,
+        authorNick: 'Krystian',
+        content: 'W co grasz?',
+        createdAt: '20.07.2022',
+    },
+    {
+        id: 8,
+        authorNick: 'Kuba',
+        content: 'Terrarie',
+        createdAt: '20.07.2022',
     }
 ]
 
-let Author, message1, message2, message3, message4, message5, message6, message7, message8, Cdata;
-[Author, message1, message2, message3, message4, message5, message6, message7, message8, Cdata] = 
-['Michał', 'Hej', 'Co porabiasz?', 'Co robisz?', 'Jakie danie dzisiaj jadłeś?', 'Chcesz pograć?', 'Wyskoczysz z nami do parku?', 'Ide do kina', 'Jestem w sklepie', '20.07.2022', ];
-
-const Message = () => {   
-
-    const mes_list = mes.map((messages) =>
-        <p style={{ border: 'solid gray', borderRadius: '15px', backgroundColor: '#F9F9F9', padding: '0px', width: "fit-content", height: "fit-content"}}>
-            <span style={{ margin: '10px' }}>
-
-                <span style={{ color: 'black', fontSize: '15px' }}>
-                    {messages.Author}
-                </span>
-                <br></br>
-
-                <span style={{ fontSize: '30px', padding: '0px' }}>
-                    {messages.message1}
-                </span>
-                <br></br>
-
-                <span style={{ fontSize: '30px', padding: '0px' }}>
-                    {messages.message2}
-                </span>
-                <br></br>
-
-                <span style={{ fontSize: '30px', padding: '0px' }}>
-                    {messages.message3}
-                </span>
-                <br></br>
-
-                <span style={{ fontSize: '30px', padding: '0px' }}>
-                    {messages.message4}
-                </span>
-                <br></br>
-
-                <span style={{ fontSize: '30px', padding: '0px' }}>
-                    {messages.message5}
-                </span>
-                <br></br>
-
-                <span style={{ fontSize: '30px', padding: '0px' }}>
-                    {messages.message6}
-                </span>
-                <br></br>
-
-                <span style={{ fontSize: '30px', padding: '0px' }}>
-                    {messages.message7}
-                </span>
-                <br></br>
-
-                <span style={{ fontSize: '30px', padding: '0px' }}>
-                    {messages.message8}
-                </span>
-                <br></br>
-
-                <span style={{ color: 'black', fontSize: '15px', padding: '0px' }}>
-                    {messages.Cdata}
-                </span>
+export const Message = () => {
+    const mes_list = mes.map((message) => {
+        let { authorNick, content } = message;
+        return (
+            <span>
+                {authorNick}
+                <p style={{ border: 'solid gray', borderRadius: '15px', backgroundColor: '#F9F9F9', padding: '10px', width: 'fit-content', height: 'fit-content', fontSize: '15px', color: 'black', margin: '10px 0px 0px 10px' }}>
+                    {content}
+                </p>
             </span>
-        </p>)
-
-    return (
-        <h1>{mes_list}</h1>
-    )
+        )
+    })
+    return <div>{mes_list}</div>
 }
-export default Message
