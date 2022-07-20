@@ -36,11 +36,11 @@ public class VerifyUser {
         this.verifier = JWT.require(Algorithm.HMAC256(this.secret)).build();
     }
 
-    @Pointcut("@annotation(VerifyJWT)")
-    public void point(){}
+    @Pointcut(value = "@annotation(withoutArgs)")
+    public void point(VerifyJWT withoutArgs){}
 
-    @Around("point()")
-    public Object userJWT(ProceedingJoinPoint pjp) throws Throwable {
+    @Around(value = "point(withoutArgs)", argNames = "pjp,withoutArgs")
+    public Object userJWT(ProceedingJoinPoint pjp, VerifyJWT withoutArgs) throws Throwable {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         String header = request.getHeader("Authorization");
         if (!StringUtils.hasText(header)){
@@ -53,6 +53,9 @@ public class VerifyUser {
             Claim decodedClaims = decodedJWT.getClaims().get("nickname");
             String nickname = decodedClaims.asString();
 
+            if(withoutArgs.withoutArgs()){
+                return pjp.proceed(pjp.getArgs());
+            }
             UserNickname arg = (UserNickname) pjp.getArgs()[0];
             arg.setNickname(nickname);
 

@@ -22,6 +22,8 @@ public class UserController {
 
     @Operation(summary = "Get all users")
     @GetMapping
+    @VerifyJWT(withoutArgs = true)
+    @SecurityRequirement(name = "JWT")
     public List<UserResponseDTO> getUsers(){
         return userService.getAllUsers().stream()
                 .map(this::createUserResponseDTO)
@@ -33,6 +35,8 @@ public class UserController {
             parameters = {@Parameter(name = "nick", description = "User nick")}
     )
     @GetMapping("/{nick}")
+    @VerifyJWT(withoutArgs = true)
+    @SecurityRequirement(name = "JWT")
     public UserResponseDTO getUser(@PathVariable String nick){
         User user = userService.getUserByNick(nick);
 

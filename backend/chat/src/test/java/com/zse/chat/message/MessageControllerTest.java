@@ -68,10 +68,10 @@ class MessageControllerTest {
         List<User> users = new ArrayList<>();
         users.add(createUserForTest(1).build());
         users.add(createUserForTest(2).build());
-        messages.add(new Message(1, users.get(0), "content1", LocalDateTime.now()));
-        messages.add(new Message(2, users.get(1), "content2", LocalDateTime.now()));
-        messages.add(new Message(3, users.get(0), "content3", LocalDateTime.now()));
-        messages.add(new Message(4, users.get(0), "content4", LocalDateTime.now()));
+        messages.add(new Message(1, users.get(0), "content1", LocalDateTime.now(), false));
+        messages.add(new Message(2, users.get(1), "content2", LocalDateTime.now(), false));
+        messages.add(new Message(3, users.get(0), "content3", LocalDateTime.now(), false));
+        messages.add(new Message(4, users.get(0), "content4", LocalDateTime.now(), false));
 
         when(messageService.getAllMessages()).thenReturn(messages);
 
@@ -99,7 +99,7 @@ class MessageControllerTest {
     public void shouldReturnMessageById() throws Exception {
         int id = 1;
         User user = createUserForTest(1).build();
-        Message message = new Message(1, user, "content1", LocalDateTime.now());
+        Message message = new Message(1, user, "content1", LocalDateTime.now(), false);
 
         when(messageService.getMessageById(id)).thenReturn(message);
 
@@ -136,7 +136,7 @@ class MessageControllerTest {
                 .nickname(nick)
                 .content("content1")
                 .build();
-        Message message = new Message(1, user, "content1", LocalDateTime.now());
+        Message message = new Message(1, user, "content1", LocalDateTime.now(), false);
         String body = mapper.writeValueAsString(messageRequestDTO);
 
         when(userService.getUserByNick(nick)).thenReturn(user);
@@ -183,7 +183,7 @@ class MessageControllerTest {
                 .content("content1Updated")
                 .build();
         User user = createUserForTest(1).build();
-        Message message = new Message(1, user, "content1Updated", LocalDateTime.now());
+        Message message = new Message(1, user, "content1Updated", LocalDateTime.now(), false);
 
         String body = mapper.writeValueAsString(messageRequesDTO);
 

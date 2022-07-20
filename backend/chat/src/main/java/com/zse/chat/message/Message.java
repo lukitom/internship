@@ -1,9 +1,8 @@
 package com.zse.chat.message;
 
 import com.zse.chat.user.User;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 
@@ -11,9 +10,11 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Data
-@AllArgsConstructor
+@RequiredArgsConstructor
+@Getter
+@Setter
 @Builder
+@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class Message {
 
     @Id
@@ -27,17 +28,20 @@ public class Message {
                     @Parameter(name = "increment_size", value = "1")
             }
     )
-    private final int id;
+    int id;
 
     @ManyToOne
     @JoinColumn(name = "nickname", nullable = false)
-    private User author;
-    private final String content;
-    private final LocalDateTime createdAt;
+    User author;
+    String content;
+    LocalDateTime createdAt;
+    boolean deleted;
 
     protected Message(){
         this.id = 0;
+        this.author = null;
         this.content = "";
         this.createdAt = null;
+        this.deleted = false;
     }
 }

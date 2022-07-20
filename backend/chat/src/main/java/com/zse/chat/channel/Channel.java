@@ -2,9 +2,9 @@ package com.zse.chat.channel;
 
 import com.zse.chat.message.Message;
 import com.zse.chat.user.User;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 
@@ -13,9 +13,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity(name = "channel")
-@Data
-@AllArgsConstructor
+@RequiredArgsConstructor
+@Getter
+@Setter
 @Builder
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class Channel {
 
     @Id
@@ -36,23 +38,24 @@ public class Channel {
             joinColumns = @JoinColumn(name = "channel_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
-    private List<User> owners;
+    @NonFinal List<User> owners;
     @ManyToMany
     @JoinTable(
             name = "user_member_channel",
             joinColumns = @JoinColumn(name = "channel_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
-    private List<User> members;
+    @NonFinal List<User> members;
 
     @OneToMany
     @JoinColumn(name = "channel_id")
-    private List<Message> messages;
+    List<Message> messages;
 
     protected Channel() {
         this.id = 0;
         this.owners = new ArrayList<>();
         this.members = new ArrayList<>();
+        this.messages = new ArrayList<>();
     }
 
 }

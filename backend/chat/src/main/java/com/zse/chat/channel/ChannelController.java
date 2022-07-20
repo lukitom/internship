@@ -89,7 +89,7 @@ public class ChannelController {
 
     private ChannelResponseDTO createChannelResponseDTO(Channel channel){
         return ChannelResponseDTO.builder()
-                .id(channel.id)
+                .id(channel.getId())
                 .owners(channel.getOwners().stream().map(User::getNickname).toList())
                 .members(channel.getMembers().stream().map(User::getNickname).toList())
                 .build();

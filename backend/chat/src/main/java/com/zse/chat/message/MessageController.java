@@ -16,10 +16,11 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Tag(name = "Messages")
+@Tag(name = "Messages global", description = "Endpoints to messages in global channel")
 @RequestMapping("/messages")
 @RestController
 @RequiredArgsConstructor
+@SecurityRequirement(name = "JWT")
 public class MessageController {
 
     private final MessageService messageService;
@@ -27,17 +28,20 @@ public class MessageController {
 
     @Operation(summary = "Get all messages")
     @GetMapping
+    @VerifyJWT(withoutArgs = true)
     public List<MessageResponseDTO> getMessages(){
         return messageService.getAllMessages().stream()
                 .map(this::createMessageResponseDTO)
                 .toList();
     }
 
+    @Deprecated
     @Operation(
             summary = "Get message by Id",
             parameters = {@Parameter(name = "id", description = "Message Id")}
     )
     @GetMapping("/{id}")
+    @VerifyJWT(withoutArgs = true)
     public MessageResponseDTO getMessageById(@PathVariable int id){
         Message message = messageService.getMessageById(id);
 
@@ -47,7 +51,6 @@ public class MessageController {
     @Operation(summary = "Create new message")
     @PostMapping
     @VerifyJWT
-    @SecurityRequirement(name = "JWT")
     public MessageResponseDTO createMessage(@RequestBody MessageRequestDTO messageRequestDTO){
         User author = userService.getUserByNick(messageRequestDTO.getNickname());
         Message savedMessage = messageService.saveMessage(messageRequestDTO, author);
@@ -61,7 +64,6 @@ public class MessageController {
     )
     @PutMapping("/{id}")
     @VerifyJWT
-    @SecurityRequirement(name = "JWT")
     public MessageResponseDTO updateMessage(@RequestBody MessageRequestDTO messageRequestDTO, @PathVariable int id){
         Message updatedMessage = messageService.updateMessageById(id, messageRequestDTO);
 
