@@ -1,10 +1,10 @@
-import {Message} from "./Message/index";
+import { Message } from './Message';
 
 function App() {
 
   return (
-    <div className="App">
-        <Message />
+    <div className='App'>
+      <Message />
     </div>
   );
 }

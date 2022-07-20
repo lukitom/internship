@@ -49,17 +49,27 @@ const mes = [
     }
 ]
 
-export const Message = () => {
-    const mes_list = mes.map((message) => {
-        let { authorNick, content } = message;
-        return (
+export const Message = () => (
+    <>
+        {mes.map(({ authorNick, content }) => (
             <span>
                 {authorNick}
-                <p style={{ border: 'solid gray', borderRadius: '15px', backgroundColor: '#F9F9F9', padding: '10px', width: 'fit-content', height: 'fit-content', fontSize: '15px', color: 'black', margin: '10px 0px 0px 10px' }}>
+                <p
+                    style={{
+                        border: "solid gray",
+                        borderRadius: "15px",
+                        backgroundColor: "#F9F9F9",
+                        padding: "10px",
+                        width: "fit-content",
+                        height: "fit-content",
+                        fontSize: "15px",
+                        color: "black",
+                        margin: "10px 0px 0px 10px",
+                    }}
+                >
                     {content}
                 </p>
             </span>
-        )
-    })
-    return <div>{mes_list}</div>
-}
+        ))}
+    </>
+);
