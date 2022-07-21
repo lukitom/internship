@@ -54,7 +54,7 @@ public class ChannelController {
     public ChannelResponseDTO updateChannelUsers(@RequestBody ChannelRequestDTO channelRequestDTO){
         var channel = channelService.getChannelById(channelRequestDTO.getId());
 
-        boolean hasPermission = channelService.userHasPermissionToUpdateChannel(channel, channelRequestDTO.getUserNickname());
+        boolean hasPermission = channelService.userHasPermissionToUpdateChannel(channel, channelRequestDTO.getNickname());
 
         if (!hasPermission){
             throw new ChannelUpdateFailedException();

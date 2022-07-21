@@ -26,7 +26,7 @@ public class MessageController {
     private final MessageService messageService;
     private final UserService userService;
 
-    @Operation(summary = "Get all messages")
+    @Operation(summary = "Get all messages in global channel")
     @GetMapping
     @VerifyJWT(withoutArgs = true)
     public List<MessageResponseDTO> getMessages(){
@@ -37,7 +37,7 @@ public class MessageController {
 
     @Deprecated
     @Operation(
-            summary = "Get message by Id",
+            summary = "Get message in global channel by Id",
             parameters = {@Parameter(name = "id", description = "Message Id")}
     )
     @GetMapping("/{id}")
@@ -48,7 +48,7 @@ public class MessageController {
         return createMessageResponseDTO(message);
     }
 
-    @Operation(summary = "Create new message")
+    @Operation(summary = "Create new message in global channel")
     @PostMapping
     @VerifyJWT
     public MessageResponseDTO createMessage(@RequestBody MessageRequestDTO messageRequestDTO){
@@ -59,28 +59,45 @@ public class MessageController {
     }
 
     @Operation(
-            summary = "Update message by Id",
+            summary = "Update message in global channel by Id",
             parameters = {@Parameter(name = "id", description = "Message Id")}
     )
     @PutMapping("/{id}")
     @VerifyJWT
-    public MessageResponseDTO updateMessage(@RequestBody MessageRequestDTO messageRequestDTO, @PathVariable int id){
+    public MessageResponseDTO updateMessage(
+            @RequestBody MessageRequestDTO messageRequestDTO,
+            @PathVariable int id
+    ){
         Message updatedMessage = messageService.updateMessageById(id, messageRequestDTO);
 
         return createMessageResponseDTO(updatedMessage);
     }
 
+
+    @Operation(
+            summary = "Delete message in global channel by Id",
+            parameters = {@Parameter(name = "id", description = "Message Id")}
+    )
+    @DeleteMapping("/{id}")
+    @VerifyJWT
+    public void deleteMessage(
+            @RequestBody MessageRequestDTO messageRequestDTO,
+            @PathVariable int id
+    ){
+        messageService.updateMessageById(id, messageRequestDTO, true);
+    }
+
     //region DTOs
     @Data
     @Builder
-    static class MessageRequestDTO implements UserNickname {
+    public static class MessageRequestDTO implements UserNickname {
         private String nickname;
         private String content;
     }
 
     @Data
     @Builder
-    static class MessageResponseDTO {
+    public static class MessageResponseDTO {
         private int id;
         private String authorNick;
         private String content;

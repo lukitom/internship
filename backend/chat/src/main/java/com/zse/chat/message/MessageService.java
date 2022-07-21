@@ -15,7 +15,7 @@ public class MessageService {
     private final MessageRepository messageRepository;
 
     public List<Message> getAllMessages() {
-        return messageRepository.findAllByOrderByIdAsc();
+        return messageRepository.findAllByDeletedFalseAndChannelIsNullOrderByIdAsc();
     }
 
     public Message getMessageById(int id) {
@@ -31,8 +31,16 @@ public class MessageService {
          return messageRepository.save(newMessage);
     }
 
-    public Message updateMessageById(int id, MessageController.MessageRequestDTO messageRequestDTO) {
+    public Message updateMessageById(int id, MessageController.MessageRequestDTO messageRequestDTO){
+        return updateMessageById(id, messageRequestDTO, false);
+    }
+
+    public Message updateMessageById(int id, MessageController.MessageRequestDTO messageRequestDTO, boolean delete) {
         Message previousMessage = getMessageById(id);
+
+        if(previousMessage.isDeleted()){
+            throw new MessageNotFoundException(previousMessage.getId());
+        }
 
         if (!messageRequestDTO.getNickname().equals(previousMessage.getAuthor().getNickname())){
             throw new MessageUpdateFailedException();
@@ -43,8 +51,10 @@ public class MessageService {
                 .author(previousMessage.getAuthor())
                 .content(messageRequestDTO.getContent())
                 .createdAt(previousMessage.getCreatedAt())
+                .deleted(delete)
                 .build();
 
         return messageRepository.save(updatedMessage);
     }
+
 }

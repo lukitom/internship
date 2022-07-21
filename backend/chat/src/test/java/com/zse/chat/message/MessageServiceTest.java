@@ -59,12 +59,12 @@ class MessageServiceTest {
         messages.add(MessageFixture.createDefaultMessage(5, users.get(2)).build());
         messages.add(MessageFixture.createDefaultMessage(6, users.get(2)).build());
 
-        when(messageRepository.findAllByOrderByIdAsc()).thenReturn(messages);
+        when(messageRepository.findAllByDeletedFalseAndChannelIsNullOrderByIdAsc()).thenReturn(messages);
 
         List<Message> returned = messageService.getAllMessages();
 
         assertThat(returned, hasSize(6));
-        verify(messageRepository, times(1)).findAllByOrderByIdAsc();
+        verify(messageRepository, times(1)).findAllByDeletedFalseAndChannelIsNullOrderByIdAsc();
         verifyNoMoreInteractions(messageRepository);
     }
 
@@ -72,12 +72,12 @@ class MessageServiceTest {
     public void shouldReturnEmptyListOfMessages(){
         List<Message> messages = new ArrayList<>();
 
-        when(messageRepository.findAllByOrderByIdAsc()).thenReturn(messages);
+        when(messageRepository.findAllByDeletedFalseAndChannelIsNullOrderByIdAsc()).thenReturn(messages);
 
         List<Message> returned = messageService.getAllMessages();
 
         assertThat(returned, hasSize(0));
-        verify(messageRepository, times(1)).findAllByOrderByIdAsc();
+        verify(messageRepository, times(1)).findAllByDeletedFalseAndChannelIsNullOrderByIdAsc();
         verifyNoMoreInteractions(messageRepository);
     }
     //endregion

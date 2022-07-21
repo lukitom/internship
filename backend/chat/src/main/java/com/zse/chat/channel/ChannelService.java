@@ -21,10 +21,6 @@ public class ChannelService {
         return channelRepository.findById(id).orElseThrow(() -> new ChannelNotFoundException(id));
     }
 
-    public Channel findChannelById(int id){
-        return channelRepository.findById(id).orElseThrow(() -> new ChannelNotFoundException(id));
-    }
-
     public Channel saveChannel(User user){
         Channel channel = Channel.builder()
                 .owners(List.of(user))
@@ -72,4 +68,17 @@ public class ChannelService {
 
         return channelRepository.save(updatedChannel);
     }
+
+    public boolean userHasPermissionToSeeChannel(Channel channel, String nickname){
+        Optional<User> resultOwner = channel.getOwners()
+                .stream().filter(owner -> owner.getNickname().equals(nickname))
+                .findFirst();
+
+        Optional<User> resultMember = channel.getMembers()
+                .stream().filter(member -> member.getNickname().equals(nickname))
+                .findFirst();
+
+        return resultOwner.isPresent() || resultMember.isPresent();
+    }
+
 }

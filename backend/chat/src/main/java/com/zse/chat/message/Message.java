@@ -1,5 +1,6 @@
 package com.zse.chat.message;
 
+import com.zse.chat.channel.Channel;
 import com.zse.chat.user.User;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -35,6 +36,8 @@ public class Message {
     User author;
     String content;
     LocalDateTime createdAt;
+    @ManyToOne(fetch = FetchType.EAGER)
+    Channel channel;
     boolean deleted;
 
     protected Message(){
@@ -42,6 +45,7 @@ public class Message {
         this.author = null;
         this.content = "";
         this.createdAt = null;
+        this.channel = null;
         this.deleted = false;
     }
 }
