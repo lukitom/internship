@@ -108,7 +108,7 @@ public class UserController {
         Optional<String> phoneNumber;
         Optional<String> country;
         Optional<String> city;
-        Optional<UserStatus> userStatus;
+        Optional<User.UserStatus> userStatus;
         Optional<User.Language> language;
         Optional<String> timeZone;
 

@@ -101,7 +101,7 @@ class UserServiceTest {
         assertThat(user.getCity(), equalTo("testCity1"));
         assertThat(user.getUserLanguage(), equalTo(User.Language.POLISH));
         assertThat(user.getTimeZone(), equalTo(TimeZone.getTimeZone("Europe/Warsaw")));
-        assertThat(user.getUserStatus(), equalTo(UserStatus.OFFLINE));
+        assertThat(user.getUserStatus(), equalTo(User.UserStatus.OFFLINE));
         assertThat(user.getShowFirstNameAndLastName(), equalTo(false));
         assertThat(user.getShowEmail(), equalTo(false));
         assertThat(user.getShowPhoneNumber(), equalTo(false));
@@ -238,7 +238,7 @@ class UserServiceTest {
         assertThat(returnedUser.getCity(), equalTo("testCity1"));
         assertThat(returnedUser.getUserLanguage(), equalTo(User.Language.POLISH));
         assertThat(returnedUser.getTimeZone(), equalTo(TimeZone.getTimeZone("Europe/Warsaw")));
-        assertThat(returnedUser.getUserStatus(), equalTo(UserStatus.OFFLINE));
+        assertThat(returnedUser.getUserStatus(), equalTo(User.UserStatus.OFFLINE));
         assertThat(returnedUser.getShowFirstNameAndLastName(), equalTo(false));
         assertThat(returnedUser.getShowEmail(), equalTo(false));
         assertThat(returnedUser.getShowPhoneNumber(), equalTo(false));
@@ -299,7 +299,7 @@ class UserServiceTest {
         assertThat(updatedUser.getCountry(), equalTo("testCountryUpdated1"));
         assertThat(updatedUser.getCity(), equalTo("testCityUpdated1"));
         assertThat(updatedUser.getUserLanguage(), equalTo(User.Language.POLISH));
-        assertThat(updatedUser.getUserStatus(), equalTo(UserStatus.OFFLINE));
+        assertThat(updatedUser.getUserStatus(), equalTo(User.UserStatus.OFFLINE));
         assertThat(updatedUser.getShowFirstNameAndLastName(), equalTo(true));
         assertThat(updatedUser.getShowEmail(), equalTo(true));
         assertThat(updatedUser.getShowPhoneNumber(), equalTo(true));

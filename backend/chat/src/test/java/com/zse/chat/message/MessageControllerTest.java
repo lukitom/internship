@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zse.chat.user.User;
 import com.zse.chat.user.UserNotFoundException;
 import com.zse.chat.user.UserService;
-import com.zse.chat.user.UserStatus;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -50,7 +49,7 @@ class MessageControllerTest {
                 .city("testCity" + number)
                 .phoneNumber("testPhoneNumber" + number)
 
-                .userStatus(UserStatus.OFFLINE)
+                .userStatus(User.UserStatus.OFFLINE)
                 .userLanguage(User.Language.POLISH)
                 .timeZone(TimeZone.getTimeZone("Europe/Warsaw"))
 

@@ -1,5 +1,6 @@
 package com.zse.chat.channel;
 
+import com.zse.chat.message.Message;
 import com.zse.chat.user.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -32,17 +33,21 @@ public class Channel {
     @ManyToMany
     @JoinTable(
             name = "user_owner_channel",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "channel_id")
+            joinColumns = @JoinColumn(name = "channel_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
     )
     private List<User> owners;
     @ManyToMany
     @JoinTable(
             name = "user_member_channel",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "channel_id")
+            joinColumns = @JoinColumn(name = "channel_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
     )
     private List<User> members;
+
+    @OneToMany
+    @JoinColumn(name = "channel_id")
+    private List<Message> messages;
 
     protected Channel() {
         this.id = 0;

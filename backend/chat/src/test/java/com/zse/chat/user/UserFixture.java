@@ -15,7 +15,7 @@ public class UserFixture {
                 .city("testCity" + number)
                 .userLanguage(User.Language.POLISH)
                 .timeZone(TimeZone.getTimeZone("Europe/Warsaw"))
-                .userStatus(UserStatus.OFFLINE)
+                .userStatus(User.UserStatus.OFFLINE)
                 .showFirstNameAndLastName(false)
                 .showEmail(false)
                 .showPhoneNumber(false)
