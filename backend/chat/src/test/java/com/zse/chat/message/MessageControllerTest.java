@@ -45,10 +45,10 @@ class MessageControllerTest {
         List<User> users = new ArrayList<>();
         users.add(UserFixture.createDefaultUser(1).build());
         users.add(UserFixture.createDefaultUser(2).build());
-        messages.add(new Message(1, users.get(0), "content1", LocalDateTime.now()));
-        messages.add(new Message(2, users.get(1), "content2", LocalDateTime.now()));
-        messages.add(new Message(3, users.get(0), "content3", LocalDateTime.now()));
-        messages.add(new Message(4, users.get(0), "content4", LocalDateTime.now()));
+        messages.add(new Message(1, users.get(0), "content1", LocalDateTime.now(), null, false));
+        messages.add(new Message(2, users.get(1), "content2", LocalDateTime.now(), null, false));
+        messages.add(new Message(3, users.get(0), "content3", LocalDateTime.now(), null, false));
+        messages.add(new Message(4, users.get(0), "content4", LocalDateTime.now(), null, false));
 
         when(messageService.getAllMessagesInGlobalChannel()).thenReturn(messages);
 

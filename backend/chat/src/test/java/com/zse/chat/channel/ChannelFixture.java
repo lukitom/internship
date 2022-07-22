@@ -8,13 +8,13 @@ import java.util.List;
 public class ChannelFixture {
 
     public static Channel.ChannelBuilder createDefaultChannel(
-            int num,
+            int number,
             List<User> owners,
             List<User> members,
             List<Message> messages
     ) {
         return Channel.builder()
-                .id(num)
+                .id(number)
                 .owners(owners)
                 .members(members)
                 .messages(messages);
