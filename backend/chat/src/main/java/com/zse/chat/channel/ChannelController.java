@@ -7,10 +7,7 @@ import com.zse.chat.user.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.springframework.web.bind.annotation.*;
 
@@ -69,6 +66,8 @@ public class ChannelController {
     //region DTOs
     @Data
     @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     @FieldDefaults(level = AccessLevel.PRIVATE)
     static class ChannelRequestDTO implements UserNickname {
         Integer id;

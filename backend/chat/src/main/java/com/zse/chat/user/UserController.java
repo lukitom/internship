@@ -88,6 +88,7 @@ public class UserController {
     @Data
     @AllArgsConstructor
     @Builder
+    @NoArgsConstructor
     @FieldDefaults(level = AccessLevel.PRIVATE)
     static class CreateUserDTO implements UserNickname {
         String nickname;
@@ -103,6 +104,7 @@ public class UserController {
     @Data
     @AllArgsConstructor
     @Builder
+    @NoArgsConstructor
     @FieldDefaults(level = AccessLevel.PRIVATE)
     static class UpdateUserDTO implements UserNickname {
         String nickname;
@@ -126,6 +128,7 @@ public class UserController {
 
     @Data
     @AllArgsConstructor
+    @NoArgsConstructor
     static class UserDetailRequestDTO implements UserNickname {
         String nickname;
     }

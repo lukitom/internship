@@ -1,16 +1,13 @@
 package com.zse.chat.message;
 
 import com.zse.chat.login.VerifyJWT;
-import com.zse.chat.user.User;
 import com.zse.chat.user.UserNickname;
 import com.zse.chat.user.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.Builder;
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -89,6 +86,8 @@ public class MessageController {
 
     //region DTOs
     @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
     @Builder
     public static class MessageRequestDTO implements UserNickname {
         private String nickname;
@@ -96,6 +95,8 @@ public class MessageController {
     }
 
     @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
     @Builder
     public static class MessageResponseDTO {
         private int id;

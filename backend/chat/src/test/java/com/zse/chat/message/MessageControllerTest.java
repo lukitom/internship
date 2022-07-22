@@ -120,8 +120,8 @@ class MessageControllerTest {
         when(messageService.saveMessage(messageRequestDTO, user)).thenReturn(message);
 
         mockMvc.perform(post("/messages")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(body))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", equalTo(1)))
