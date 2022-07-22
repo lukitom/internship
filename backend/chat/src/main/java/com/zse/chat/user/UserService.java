@@ -19,29 +19,29 @@ public class UserService {
     }
 
     public User saveUser(UserController.CreateUserDTO createUserDTO) {
-        String nickname = createUserDTO.getNickname();
+        final var nickname = createUserDTO.getNickname();
         if(nickname == null){
             throw new MissingPayloadFieldException("nickname");
         }
 
-        String email = createUserDTO.getEmail();
+        final var email = createUserDTO.getEmail();
         if (email == null){
             throw new MissingPayloadFieldException("email");
         }
 
-        Optional<User> userInDB = userRepository.findByNickname(nickname);
+        final Optional<User> userInDB = userRepository.findByNickname(nickname);
 
         if (userInDB.isPresent()){
             throw new UserWithNickAlreadyExistsException(nickname);
         }
 
-        Optional<User> userEmail = userRepository.findByEmail(email);
+        final Optional<User> userEmail = userRepository.findByEmail(email);
 
         if (userEmail.isPresent()){
             throw new UserWithEmailAlreadyExistsExeption(email);
         }
 
-        final User user = User.builder()
+        final var user = User.builder()
                 .nickname(nickname)
                 .firstName(createUserDTO.getFirstName())
                 .lastName(createUserDTO.getLastName())
@@ -67,15 +67,15 @@ public class UserService {
     }
 
     public User updateUser(UserController.UpdateUserDTO updateUserDTO) {
-        String nick = updateUserDTO.getNickname();
-        if (!StringUtils.hasText(nick)){
+        final var nickname = updateUserDTO.getNickname();
+        if (!StringUtils.hasText(nickname)){
             throw new MissingPayloadFieldException("nickname");
         }
-        Optional<User> user = userRepository.findByNickname(nick);
+        final Optional<User> user = userRepository.findByNickname(nickname);
 
-        User savedUser = user.orElseThrow(() -> new UserNotFoundException(nick));
+        final var savedUser = user.orElseThrow(() -> new UserNotFoundException(nickname));
 
-        User updatedUser = User.builder()
+        final var updatedUser = User.builder()
                 .id(savedUser.getId())
                 .email(savedUser.getEmail())
                 .nickname(savedUser.getNickname())

@@ -22,6 +22,8 @@ public class UserController {
 
     @Operation(summary = "Get all users")
     @GetMapping
+    @VerifyJWT(withoutArgs = true)
+    @SecurityRequirement(name = "JWT")
     public List<UserResponseDTO> getUsers(){
         return userService.getAllUsers().stream()
                 .map(this::createUserResponseDTO)
@@ -33,8 +35,10 @@ public class UserController {
             parameters = {@Parameter(name = "nick", description = "User nick")}
     )
     @GetMapping("/{nick}")
+    @VerifyJWT(withoutArgs = true)
+    @SecurityRequirement(name = "JWT")
     public UserResponseDTO getUser(@PathVariable String nick){
-        User user = userService.getUserByNick(nick);
+        final var user = userService.getUserByNick(nick);
 
         return createUserResponseDTO(user);
     }
@@ -43,7 +47,7 @@ public class UserController {
     @VerifyJWT
     @SecurityRequirement(name = "JWT")
     public UserDetailResponseDTO getUserDetails(UserDetailRequestDTO userDetailRequestDTO){
-        User user = userService.getUserByNick(userDetailRequestDTO.getNickname());
+        final var user = userService.getUserByNick(userDetailRequestDTO.getNickname());
 
         return createUserDetailResponseDTO(user);
     }
@@ -51,7 +55,7 @@ public class UserController {
     @Operation(summary = "Create new User")
     @PostMapping
     public UserResponseDTO createUser(@RequestBody CreateUserDTO createUserDTO){
-        User savedUser = userService.saveUser(createUserDTO);
+        final var savedUser = userService.saveUser(createUserDTO);
 
         return createUserResponseDTO(savedUser);
     }
@@ -61,7 +65,7 @@ public class UserController {
     @VerifyJWT
     @SecurityRequirement(name = "JWT")
     public UserResponseDTO updateUser(@RequestBody UpdateUserDTO updateUserDTO){
-        User updatedUser = userService.updateUser(updateUserDTO);
+        final var updatedUser = userService.updateUser(updateUserDTO);
 
         return createUserResponseDTO(updatedUser);
     }

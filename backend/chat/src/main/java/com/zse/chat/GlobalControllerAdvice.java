@@ -6,6 +6,7 @@ import com.zse.chat.login.MessageUpdateFailedException;
 import com.zse.chat.login.InvalidJWTException;
 import com.zse.chat.login.MissingJWTException;
 import com.zse.chat.message.MessageNotFoundException;
+import com.zse.chat.message.channel.ChannelAccessFailedException;
 import com.zse.chat.user.MissingPayloadFieldException;
 import com.zse.chat.user.UserNotFoundException;
 import com.zse.chat.user.UserWithEmailAlreadyExistsExeption;
@@ -67,7 +68,11 @@ public class GlobalControllerAdvice {
     }
 
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    @ExceptionHandler({MessageUpdateFailedException.class, ChannelUpdateFailedException.class})
+    @ExceptionHandler({
+            MessageUpdateFailedException.class,
+            ChannelUpdateFailedException.class,
+            ChannelAccessFailedException.class
+    })
     public ExceptionResponse updateForbidden(Exception exception){
         return ExceptionResponse.builder()
                 .responseCode(HttpStatus.FORBIDDEN.value())
