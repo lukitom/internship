@@ -15,7 +15,7 @@ import java.util.List;
 @Entity(name = "channel")
 @Getter
 @Setter
-@Builder
+@Builder(toBuilder = true)
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class Channel {

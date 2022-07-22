@@ -38,7 +38,7 @@ public class UserController {
     @VerifyJWT(withoutArgs = true)
     @SecurityRequirement(name = "JWT")
     public UserResponseDTO getUser(@PathVariable String nick){
-        User user = userService.getUserByNick(nick);
+        final var user = userService.getUserByNick(nick);
 
         return createUserResponseDTO(user);
     }
@@ -47,7 +47,7 @@ public class UserController {
     @VerifyJWT
     @SecurityRequirement(name = "JWT")
     public UserDetailResponseDTO getUserDetails(UserDetailRequestDTO userDetailRequestDTO){
-        User user = userService.getUserByNick(userDetailRequestDTO.getNickname());
+        final var user = userService.getUserByNick(userDetailRequestDTO.getNickname());
 
         return createUserDetailResponseDTO(user);
     }
@@ -55,7 +55,7 @@ public class UserController {
     @Operation(summary = "Create new User")
     @PostMapping
     public UserResponseDTO createUser(@RequestBody CreateUserDTO createUserDTO){
-        User savedUser = userService.saveUser(createUserDTO);
+        final var savedUser = userService.saveUser(createUserDTO);
 
         return createUserResponseDTO(savedUser);
     }
@@ -65,7 +65,7 @@ public class UserController {
     @VerifyJWT
     @SecurityRequirement(name = "JWT")
     public UserResponseDTO updateUser(@RequestBody UpdateUserDTO updateUserDTO){
-        User updatedUser = userService.updateUser(updateUserDTO);
+        final var updatedUser = userService.updateUser(updateUserDTO);
 
         return createUserResponseDTO(updatedUser);
     }

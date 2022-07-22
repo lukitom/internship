@@ -61,7 +61,7 @@ class MessageServiceTest {
 
         when(messageRepository.findAllByDeletedFalseAndChannelIsNullOrderByIdAsc()).thenReturn(messages);
 
-        List<Message> returned = messageService.getAllMessages();
+        List<Message> returned = messageService.getAllMessagesInGlobalChannel();
 
         assertThat(returned, hasSize(6));
         verify(messageRepository, times(1)).findAllByDeletedFalseAndChannelIsNullOrderByIdAsc();
@@ -74,7 +74,7 @@ class MessageServiceTest {
 
         when(messageRepository.findAllByDeletedFalseAndChannelIsNullOrderByIdAsc()).thenReturn(messages);
 
-        List<Message> returned = messageService.getAllMessages();
+        List<Message> returned = messageService.getAllMessagesInGlobalChannel();
 
         assertThat(returned, hasSize(0));
         verify(messageRepository, times(1)).findAllByDeletedFalseAndChannelIsNullOrderByIdAsc();

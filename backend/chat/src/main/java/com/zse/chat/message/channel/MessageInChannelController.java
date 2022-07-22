@@ -38,10 +38,10 @@ public class MessageInChannelController {
             MessageRequestDTO messageRequestDTO,
             @PathVariable int channelId
     ) {
-        Channel channel = channelService.getChannelById(channelId);
+        final var channel = channelService.getChannelById(channelId);
         checkAccess(channel, messageRequestDTO.getNickname());
 
-        List<Message> messages = messageChannelService.getMessages(channel);
+        final List<Message> messages = messageChannelService.getMessages(channel);
 
         return messages.stream()
                 .map(this::createMessageResponseDTO).toList();
@@ -57,12 +57,12 @@ public class MessageInChannelController {
             @RequestBody MessageRequestDTO messageRequestDTO,
             @PathVariable int channelId
     ) {
-        Channel channel = channelService.getChannelById(channelId);
+        final var channel = channelService.getChannelById(channelId);
         checkAccess(channel, messageRequestDTO.getNickname());
 
-        User user = userService.getUserByNick(messageRequestDTO.getNickname());
+        final var user = userService.getUserByNick(messageRequestDTO.getNickname());
 
-        Message savedMessage = messageChannelService.saveMessage(messageRequestDTO, user, channel);
+        final var savedMessage = messageChannelService.saveMessage(messageRequestDTO, user, channel);
 
         return createMessageResponseDTO(savedMessage);
     }
@@ -81,10 +81,10 @@ public class MessageInChannelController {
             @PathVariable int channelId,
             @PathVariable int messageId
     ) {
-        Channel channel = channelService.getChannelById(channelId);
+        final var channel = channelService.getChannelById(channelId);
         checkAccess(channel, messageRequestDTO.getNickname());
 
-        Message updatedMessage = messageChannelService.updateMessage(messageId, messageRequestDTO, channel);
+        final var updatedMessage = messageChannelService.updateMessage(messageId, messageRequestDTO, channel);
         return createMessageResponseDTO(updatedMessage);
     }
 
@@ -102,7 +102,7 @@ public class MessageInChannelController {
             @PathVariable int channelId,
             @PathVariable int messageId
     ) {
-        Channel channel = channelService.getChannelById(channelId);
+        final var channel = channelService.getChannelById(channelId);
         checkAccess(channel, messageRequestDTO.getNickname());
 
         messageChannelService.updateMessage(messageId, messageRequestDTO, channel, true);
@@ -118,7 +118,7 @@ public class MessageInChannelController {
     }
 
     private void checkAccess(Channel channel, String nickname) {
-        boolean hasPermission = channelService.userHasPermissionToSeeChannel(channel, nickname);
+        final var hasPermission = channelService.userHasPermissionToSeeChannel(channel, nickname);
         if (!hasPermission) {
             throw new ChannelAccessFailedException();
         }

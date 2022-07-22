@@ -25,7 +25,7 @@ public class MessageChannelService {
     }
 
     public Message getMessageById(int id, int channelId) {
-        Message message = messageRepository.findById(id).orElseThrow(() -> new MessageNotFoundException(id));
+        final var message = messageRepository.findById(id).orElseThrow(() -> new MessageNotFoundException(id));
 
         final var channel = Optional.ofNullable(message.getChannel())
                 .orElseThrow(() -> new MessageNotFoundException(id));
@@ -39,8 +39,9 @@ public class MessageChannelService {
     public Message saveMessage(
             MessageController.MessageRequestDTO messageRequestDTO,
             User user,
-            Channel channel) {
-        final Message newMessage = Message.builder()
+            Channel channel
+    ) {
+        final var newMessage = Message.builder()
                 .content(messageRequestDTO.getContent())
                 .author(user)
                 .createdAt(LocalDateTime.now())
@@ -63,7 +64,7 @@ public class MessageChannelService {
             Channel channel,
             boolean delete
     ) {
-        Message previousMessage = getMessageById(messageId, channel.getId());
+        final var previousMessage = getMessageById(messageId, channel.getId());
 
         if(previousMessage.isDeleted()){
             throw new MessageNotFoundException(previousMessage.getId());
@@ -73,12 +74,8 @@ public class MessageChannelService {
             throw new MessageUpdateFailedException();
         }
 
-        Message updatedMessage = Message.builder()
-                .id(previousMessage.getId())
-                .author(previousMessage.getAuthor())
+        final var updatedMessage = previousMessage.toBuilder()
                 .content(messageRequestDTO.getContent())
-                .createdAt(previousMessage.getCreatedAt())
-                .channel(previousMessage.getChannel())
                 .deleted(delete)
                 .build();
 

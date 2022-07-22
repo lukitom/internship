@@ -36,30 +36,30 @@ public class VerifyUser {
         this.verifier = JWT.require(Algorithm.HMAC256(this.secret)).build();
     }
 
-    @Pointcut(value = "@annotation(withoutArgs)")
+    @Pointcut("@annotation(withoutArgs)")
     public void point(VerifyJWT withoutArgs){}
 
     @Around(value = "point(withoutArgs)", argNames = "pjp,withoutArgs")
     public Object userJWT(ProceedingJoinPoint pjp, VerifyJWT withoutArgs) throws Throwable {
-        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-        String header = request.getHeader("Authorization");
+        final HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+        final String header = request.getHeader("Authorization");
         if (!StringUtils.hasText(header)){
             throw new MissingJWTException();
         }
-        String token = header.replace("Bearer ", "");
+        final String token = header.replace("Bearer ", "");
 
         try{
-            DecodedJWT decodedJWT = verifier.verify(token);
-            Claim decodedClaims = decodedJWT.getClaims().get("nickname");
-            String nickname = decodedClaims.asString();
+            final DecodedJWT decodedJWT = verifier.verify(token);
+            final Claim decodedClaims = decodedJWT.getClaims().get("nickname");
+            final String nickname = decodedClaims.asString();
 
             if(withoutArgs.withoutArgs()){
                 return pjp.proceed(pjp.getArgs());
             }
-            UserNickname arg = (UserNickname) pjp.getArgs()[0];
+            final UserNickname arg = (UserNickname) pjp.getArgs()[0];
             arg.setNickname(nickname);
 
-            Object[] args = pjp.getArgs();
+            final Object[] args = pjp.getArgs();
             args[0] = arg;
 
             return pjp.proceed(args);

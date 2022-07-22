@@ -73,7 +73,7 @@ class MessageControllerTest {
         messages.add(new Message(3, users.get(0), "content3", LocalDateTime.now(), null,  false));
         messages.add(new Message(4, users.get(0), "content4", LocalDateTime.now(), null,  false));
 
-        when(messageService.getAllMessages()).thenReturn(messages);
+        when(messageService.getAllMessagesInGlobalChannel()).thenReturn(messages);
 
         mockMvc.perform(get("/messages"))
                 .andDo(print())
@@ -85,7 +85,7 @@ class MessageControllerTest {
     public void shouldReturnEmptyArrayOfMessages() throws Exception {
         List<Message> messages = new ArrayList<>();
 
-        when(messageService.getAllMessages()).thenReturn(messages);
+        when(messageService.getAllMessagesInGlobalChannel()).thenReturn(messages);
 
         mockMvc.perform(get("/messages"))
                 .andDo(print())

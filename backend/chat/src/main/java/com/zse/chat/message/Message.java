@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 @Getter
 @Setter
-@Builder
+@Builder(toBuilder = true)
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class Message {
 

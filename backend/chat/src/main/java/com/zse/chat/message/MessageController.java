@@ -30,7 +30,7 @@ public class MessageController {
     @GetMapping
     @VerifyJWT(withoutArgs = true)
     public List<MessageResponseDTO> getMessages(){
-        return messageService.getAllMessages().stream()
+        return messageService.getAllMessagesInGlobalChannel().stream()
                 .map(this::createMessageResponseDTO)
                 .toList();
     }
@@ -43,7 +43,7 @@ public class MessageController {
     @GetMapping("/{id}")
     @VerifyJWT(withoutArgs = true)
     public MessageResponseDTO getMessageById(@PathVariable int id){
-        Message message = messageService.getMessageById(id);
+        final var message = messageService.getMessageById(id);
 
         return createMessageResponseDTO(message);
     }
@@ -52,8 +52,8 @@ public class MessageController {
     @PostMapping
     @VerifyJWT
     public MessageResponseDTO createMessage(@RequestBody MessageRequestDTO messageRequestDTO){
-        User author = userService.getUserByNick(messageRequestDTO.getNickname());
-        Message savedMessage = messageService.saveMessage(messageRequestDTO, author);
+        final var author = userService.getUserByNick(messageRequestDTO.getNickname());
+        final var savedMessage = messageService.saveMessage(messageRequestDTO, author);
 
         return  createMessageResponseDTO(savedMessage);
     }
@@ -68,7 +68,7 @@ public class MessageController {
             @RequestBody MessageRequestDTO messageRequestDTO,
             @PathVariable int id
     ){
-        Message updatedMessage = messageService.updateMessageById(id, messageRequestDTO);
+        final var updatedMessage = messageService.updateMessageById(id, messageRequestDTO);
 
         return createMessageResponseDTO(updatedMessage);
     }

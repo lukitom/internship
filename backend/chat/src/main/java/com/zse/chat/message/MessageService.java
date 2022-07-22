@@ -14,7 +14,7 @@ public class MessageService {
 
     private final MessageRepository messageRepository;
 
-    public List<Message> getAllMessages() {
+    public List<Message> getAllMessagesInGlobalChannel() {
         return messageRepository.findAllByDeletedFalseAndChannelIsNullOrderByIdAsc();
     }
 
@@ -23,7 +23,7 @@ public class MessageService {
     }
 
     public Message saveMessage(MessageController.MessageRequestDTO messageRequestDTO, User user) {
-        final Message newMessage = Message.builder()
+        final var newMessage = Message.builder()
                  .content(messageRequestDTO.getContent())
                  .author(user)
                  .createdAt(LocalDateTime.now())
@@ -36,7 +36,7 @@ public class MessageService {
     }
 
     public Message updateMessageById(int id, MessageController.MessageRequestDTO messageRequestDTO, boolean delete) {
-        Message previousMessage = getMessageById(id);
+        final var previousMessage = getMessageById(id);
 
         if(previousMessage.isDeleted()){
             throw new MessageNotFoundException(previousMessage.getId());
@@ -46,7 +46,7 @@ public class MessageService {
             throw new MessageUpdateFailedException();
         }
 
-        Message updatedMessage = Message.builder()
+        final var updatedMessage = Message.builder()
                 .id(previousMessage.getId())
                 .author(previousMessage.getAuthor())
                 .content(messageRequestDTO.getContent())

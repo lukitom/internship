@@ -21,6 +21,8 @@ Type command:
 ### Database
 To create DB PostgresSQL:
 
+This will be used to connect PGAdmin with database
+
 `docker network create db-network`
 
 Modify DB user, password and DB name below and type the same in application config file

@@ -16,7 +16,7 @@ import java.util.TimeZone;
 @Getter
 @Setter
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-@Builder
+@Builder(toBuilder = true)
 public class User {
     @Id
     @GeneratedValue(generator = "sequence-generator-user")
