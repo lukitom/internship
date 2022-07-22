@@ -48,11 +48,11 @@ public class LoginController {
         if (!node.has("nickname")){
             throw new MissingPayloadFieldException("nickname");
         }
-        String nickname = node.get("nickname").asText();
+        final var nickname = node.get("nickname").asText();
 
         userService.getUserByNick(nickname);
 
-        String secret = env.getProperty("jwt.secret");
+        final var secret = env.getProperty("jwt.secret");
 
         return JWT.create()
                 .withClaim("nickname", nickname)

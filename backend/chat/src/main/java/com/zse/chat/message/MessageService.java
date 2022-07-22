@@ -14,8 +14,8 @@ public class MessageService {
 
     private final MessageRepository messageRepository;
 
-    public List<Message> getAllMessages() {
-        return messageRepository.findAllByOrderByIdAsc();
+    public List<Message> getAllMessagesInGlobalChannel() {
+        return messageRepository.findAllByDeletedFalseAndChannelIsNullOrderByIdAsc();
     }
 
     public Message getMessageById(int id) {
@@ -23,7 +23,7 @@ public class MessageService {
     }
 
     public Message saveMessage(MessageController.MessageRequestDTO messageRequestDTO, User user) {
-        final Message newMessage = Message.builder()
+        final var newMessage = Message.builder()
                  .content(messageRequestDTO.getContent())
                  .author(user)
                  .createdAt(LocalDateTime.now())
@@ -31,20 +31,30 @@ public class MessageService {
          return messageRepository.save(newMessage);
     }
 
-    public Message updateMessageById(int id, MessageController.MessageRequestDTO messageRequestDTO) {
-        Message previousMessage = getMessageById(id);
+    public Message updateMessageById(int id, MessageController.MessageRequestDTO messageRequestDTO){
+        return updateMessageById(id, messageRequestDTO, false);
+    }
+
+    public Message updateMessageById(int id, MessageController.MessageRequestDTO messageRequestDTO, boolean delete) {
+        final var previousMessage = getMessageById(id);
+
+        if(previousMessage.isDeleted()){
+            throw new MessageNotFoundException(previousMessage.getId());
+        }
 
         if (!messageRequestDTO.getNickname().equals(previousMessage.getAuthor().getNickname())){
             throw new MessageUpdateFailedException();
         }
 
-        Message updatedMessage = Message.builder()
+        final var updatedMessage = Message.builder()
                 .id(previousMessage.getId())
                 .author(previousMessage.getAuthor())
                 .content(messageRequestDTO.getContent())
                 .createdAt(previousMessage.getCreatedAt())
+                .deleted(delete)
                 .build();
 
         return messageRepository.save(updatedMessage);
     }
+
 }

@@ -21,12 +21,8 @@ public class ChannelService {
         return channelRepository.findById(id).orElseThrow(() -> new ChannelNotFoundException(id));
     }
 
-    public Channel findChannelById(int id){
-        return channelRepository.findById(id).orElseThrow(() -> new ChannelNotFoundException(id));
-    }
-
     public Channel saveChannel(User user){
-        Channel channel = Channel.builder()
+        final var channel = Channel.builder()
                 .owners(List.of(user))
                 .members(List.of())
                 .build();
@@ -35,7 +31,7 @@ public class ChannelService {
     }
 
     public boolean userHasPermissionToUpdateChannel(Channel channel, String nickname){
-        Optional<User> resultOwner = channel.getOwners()
+        final Optional<User> resultOwner = channel.getOwners()
                 .stream().filter(owner -> owner.getNickname().equals(nickname))
                 .findFirst();
 
@@ -43,8 +39,8 @@ public class ChannelService {
     }
 
     public Channel updateChannel(Channel channel, ChannelUpdateAction action, User manipulateUser){
-        List<User> owners = channel.getOwners();
-        List<User> members = channel.getMembers();
+        final List<User> owners = channel.getOwners();
+        final List<User> members = channel.getMembers();
 
         switch (action){
             case ADD_OWNER -> {
@@ -64,7 +60,7 @@ public class ChannelService {
             case REMOVE_MEMBER -> members.remove(manipulateUser);
         }
 
-        Channel updatedChannel = Channel.builder()
+        final var updatedChannel = Channel.builder()
                 .id(channel.getId())
                 .owners(owners)
                 .members(members)
@@ -72,4 +68,19 @@ public class ChannelService {
 
         return channelRepository.save(updatedChannel);
     }
+
+    public boolean userHasPermissionToSeeChannel(Channel channel, String nickname){
+        final Optional<User> resultOwner = channel.getOwners()
+                .stream()
+                .filter(owner -> owner.getNickname().equals(nickname))
+                .findFirst();
+
+        final Optional<User> resultMember = channel.getMembers()
+                .stream()
+                .filter(member -> member.getNickname().equals(nickname))
+                .findFirst();
+
+        return resultOwner.isPresent() || resultMember.isPresent();
+    }
+
 }

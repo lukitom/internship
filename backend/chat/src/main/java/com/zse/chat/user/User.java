@@ -1,10 +1,7 @@
 package com.zse.chat.user;
 
 import com.zse.chat.channel.Channel;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
@@ -15,10 +12,11 @@ import java.util.List;
 import java.util.TimeZone;
 
 @Entity(name = "chat_user")
-@Data
-@AllArgsConstructor
+@RequiredArgsConstructor
+@Getter
+@Setter
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-@Builder
+@Builder(toBuilder = true)
 public class User {
     @Id
     @GeneratedValue(generator = "sequence-generator-user")
