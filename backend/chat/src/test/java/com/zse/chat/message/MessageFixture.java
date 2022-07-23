@@ -18,7 +18,7 @@ public class MessageFixture {
     }
 
     public static List<Message> createListOfMessages(int amount){
-        return createListOfMessages(0, amount);
+        return createListOfMessages(1, amount);
     }
 
     public static List<Message> createListOfMessages(int min, int amount){

@@ -9,6 +9,9 @@ import com.zse.chat.user.UserFixture;
 import com.zse.chat.user.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.aop.AopAutoConfiguration;
@@ -21,9 +24,9 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -41,9 +44,6 @@ class ChannelControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
-    private ChannelController channelController;
-
     @MockBean
     private ChannelService channelService;
 
@@ -52,6 +52,14 @@ class ChannelControllerTest {
 
     //region fixture
     private String tokenJWT;
+
+    public static Stream<MockHttpServletRequestBuilder> paths() {
+        return Stream.of(
+                get("/channels"),
+                post("/channels"),
+                put("/channels/users")
+        );
+    }
 
     @BeforeEach
     void setUp() throws Exception {
@@ -175,12 +183,12 @@ class ChannelControllerTest {
                 membersBefore,
                 new ArrayList<>()
         ).build();
+        final var action = ChannelUpdateAction.ADD_OWNER;
 
         final var channelRequestDTO = ChannelController.ChannelRequestDTO.builder()
                 .id(1)
-                .nickname("testNickname1")
                 .userNickname("testNickname2")
-                .action(ChannelUpdateAction.ADD_OWNER).build();
+                .action(action).build();
 
         final var body = mapper.writeValueAsString(channelRequestDTO);
 
@@ -190,7 +198,7 @@ class ChannelControllerTest {
                 ArgumentMatchers.any(Channel.class), eq("testNickname1")))
                 .thenReturn(true);
         when(userService.getUserByNick("testNickname2")).thenReturn(userToManipulate);
-        when(channelService.updateChannel(channel, ChannelUpdateAction.ADD_OWNER, userToManipulate))
+        when(channelService.updateChannel(channel, action, userToManipulate))
                 .thenReturn(channel.toBuilder()
                             .owners(ownersAfter)
                             .members(membersAfter)
@@ -207,8 +215,230 @@ class ChannelControllerTest {
                 .andExpect(jsonPath("$.owners[1]", equalTo("testNickname2")))
                 .andExpect(jsonPath("$.members", hasSize(0)));
     }
+
+    @Test
+    public void shouldRemoveChannelOwner() throws Exception {
+        final var userToManipulate = UserFixture.createDefaultUser(2).build();
+
+        List<User> ownersBefore = UserFixture.createListOfDefaultUser(2);
+        List<User> ownersAfter = UserFixture.createListOfDefaultUser(1);
+        List<User> membersBefore = new ArrayList<>();
+        List<User> membersAfter = UserFixture.createListOfDefaultUser(2,1);
+
+        final var channel = ChannelFixture.createDefaultChannel(
+                1,
+                ownersBefore,
+                membersBefore,
+                new ArrayList<>()
+        ).build();
+
+        final var action = ChannelUpdateAction.REMOVE_OWNER;
+
+        final var channelRequestDTO = ChannelController.ChannelRequestDTO.builder()
+                .id(1)
+                .userNickname("testNickname2")
+                .action(action).build();
+
+        final var body = mapper.writeValueAsString(channelRequestDTO);
+
+        when(channelService.getChannelById(ArgumentMatchers.any(Integer.class)))
+                .thenReturn(channel);
+        when(channelService.userHasPermissionToUpdateChannel(
+                ArgumentMatchers.any(Channel.class), eq("testNickname1")))
+                .thenReturn(true);
+        when(userService.getUserByNick("testNickname2")).thenReturn(userToManipulate);
+        when(channelService.updateChannel(channel, action, userToManipulate))
+                .thenReturn(channel.toBuilder()
+                        .owners(ownersAfter)
+                        .members(membersAfter)
+                        .build());
+
+        mockMvc.perform(authorize(put("/channels/users"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", equalTo(1)))
+                .andExpect(jsonPath("$.owners", hasSize(1)))
+                .andExpect(jsonPath("$.owners[0]", equalTo("testNickname1")))
+                .andExpect(jsonPath("$.members", hasSize(1)))
+                .andExpect(jsonPath("$.members[0]", equalTo("testNickname2")));
+    }
+
+    @Test
+    public void shouldAddChannelMember() throws Exception {
+        final var userToManipulate = UserFixture.createDefaultUser(2).build();
+
+        List<User> owners = UserFixture.createListOfDefaultUser(1);
+        List<User> membersBefore = new ArrayList<>();
+        List<User> membersAfter = UserFixture.createListOfDefaultUser(2,1);
+
+        final var channel = ChannelFixture.createDefaultChannel(
+                1,
+                owners,
+                membersBefore,
+                new ArrayList<>()
+        ).build();
+
+        final var action = ChannelUpdateAction.ADD_MEMBER;
+
+        final var channelRequestDTO = ChannelController.ChannelRequestDTO.builder()
+                .id(1)
+                .userNickname("testNickname2")
+                .action(action).build();
+
+        final var body = mapper.writeValueAsString(channelRequestDTO);
+
+        when(channelService.getChannelById(ArgumentMatchers.any(Integer.class)))
+                .thenReturn(channel);
+        when(channelService.userHasPermissionToUpdateChannel(
+                ArgumentMatchers.any(Channel.class), eq("testNickname1")))
+                .thenReturn(true);
+        when(userService.getUserByNick("testNickname2")).thenReturn(userToManipulate);
+        when(channelService.updateChannel(channel, action, userToManipulate))
+                .thenReturn(channel.toBuilder()
+                        .owners(owners)
+                        .members(membersAfter)
+                        .build());
+
+        mockMvc.perform(authorize(put("/channels/users"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", equalTo(1)))
+                .andExpect(jsonPath("$.owners", hasSize(1)))
+                .andExpect(jsonPath("$.owners[0]", equalTo("testNickname1")))
+                .andExpect(jsonPath("$.members", hasSize(1)))
+                .andExpect(jsonPath("$.members[0]", equalTo("testNickname2")));
+    }
+
+    @Test
+    public void shouldRemoveChannelMember() throws Exception {
+        final var userToManipulate = UserFixture.createDefaultUser(2).build();
+
+        List<User> owners = UserFixture.createListOfDefaultUser(1);
+        List<User> membersBefore = UserFixture.createListOfDefaultUser(2,1);
+        List<User> membersAfter = new ArrayList<>();
+
+        final var channel = ChannelFixture.createDefaultChannel(
+                1,
+                owners,
+                membersBefore,
+                new ArrayList<>()
+        ).build();
+
+        final var action = ChannelUpdateAction.REMOVE_MEMBER;
+
+        final var channelRequestDTO = ChannelController.ChannelRequestDTO.builder()
+                .id(1)
+                .userNickname("testNickname2")
+                .action(action).build();
+
+        final var body = mapper.writeValueAsString(channelRequestDTO);
+
+        when(channelService.getChannelById(ArgumentMatchers.any(Integer.class)))
+                .thenReturn(channel);
+        when(channelService.userHasPermissionToUpdateChannel(
+                ArgumentMatchers.any(Channel.class), eq("testNickname1")))
+                .thenReturn(true);
+        when(userService.getUserByNick("testNickname2")).thenReturn(userToManipulate);
+        when(channelService.updateChannel(channel, action, userToManipulate))
+                .thenReturn(channel.toBuilder()
+                        .owners(owners)
+                        .members(membersAfter)
+                        .build());
+
+        mockMvc.perform(authorize(put("/channels/users"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", equalTo(1)))
+                .andExpect(jsonPath("$.owners", hasSize(1)))
+                .andExpect(jsonPath("$.owners[0]", equalTo("testNickname1")))
+                .andExpect(jsonPath("$.members", hasSize(0)));
+    }
     //TODO: check the rest of cases
 
+    @ParameterizedTest
+    @EnumSource(ChannelUpdateAction.class)
+    public void shouldThrowChannelUpdateFailedExceptionUserWithoutPermission(
+            ChannelUpdateAction action
+    ) throws Exception {
+        final var channel = ChannelFixture.createDefaultChannel(
+                1,
+                new ArrayList<>(),
+                new ArrayList<>(),
+                new ArrayList<>()
+        ).build();
+
+        final var channelRequestDTO = ChannelController.ChannelRequestDTO.builder()
+                .id(1)
+                .userNickname("testNickname2")
+                .action(action)
+                .build();
+
+        final var body = mapper.writeValueAsString(channelRequestDTO);
+
+        when(channelService.getChannelById(ArgumentMatchers.any(Integer.class)))
+                .thenReturn(channel);
+        when(channelService.userHasPermissionToUpdateChannel(
+                ArgumentMatchers.any(Channel.class), eq("testNickname1")))
+                .thenReturn(false);
+
+        mockMvc.perform(authorize(put("/channels/users"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andDo(print())
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.responseCode", equalTo(403)))
+                .andExpect(jsonPath("$.exceptionMessage",
+                        containsString("not possible")));
+    }
+    //endregion
+
+    //region verification JWT
+    @ParameterizedTest
+    @MethodSource("paths")
+    public void shouldThrowMissingAuthenticationToken(
+            MockHttpServletRequestBuilder path
+    ) throws Exception {
+        final var channelRequestDTO = ChannelController.ChannelRequestDTO.builder()
+                .id(1)
+                .userNickname("testNickname2")
+                .build();
+
+        mockMvc.perform(path
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(channelRequestDTO)))
+                .andDo(print())
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.responseCode", equalTo(401)))
+                .andExpect(jsonPath("$.exceptionMessage",
+                        equalTo("Missing authentication token")));
+    }
+
+    @ParameterizedTest
+    @MethodSource("paths")
+    public void shouldThrowInvalidJWTException(
+            MockHttpServletRequestBuilder path
+    ) throws Exception {
+        final var channelRequestDTO = ChannelController.ChannelRequestDTO.builder()
+                .id(1)
+                .userNickname("testNickname2")
+                .build();
+
+        mockMvc.perform(path
+                        .header("Authorization", "Bearer " + tokenJWT + "x")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(channelRequestDTO)))
+                .andDo(print())
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.responseCode", equalTo(401)))
+                .andExpect(jsonPath("$.exceptionMessage",
+                        equalTo("Provided authentication token is invalid")));
+    }
     //endregion
 
 }
