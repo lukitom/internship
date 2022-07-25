@@ -3,11 +3,12 @@ package com.zse.chat.channel;
 import com.zse.chat.message.MessageFixture;
 import com.zse.chat.user.User;
 import com.zse.chat.user.UserFixture;
+import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.AdditionalAnswers;
 import org.mockito.ArgumentMatchers;
-import org.mockito.verification.VerificationMode;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -132,19 +133,268 @@ class ChannelServiceTest {
     //endregion
 
     //region saveChannel()
+    @Test
+    public void shouldSaveChannel() {
+        final var user = UserFixture.createDefaultUser(1).build();
 
+        when(channelRepository.save(ArgumentMatchers.any(Channel.class)))
+                .then(AdditionalAnswers.returnsFirstArg());
+
+        final var channel = channelService.saveChannel(user);
+
+        assertEquals(channel.getOwners(), List.of(user));
+        assertEquals(channel.getMembers(), List.of());
+
+        verify(channelRepository, times(1)).save(ArgumentMatchers.any(Channel.class));
+        verifyNoMoreInteractions(channelRepository);
+    }
     //endregion
 
     //region userHasPermissionToUpdateChannel()
+    @Test
+    public void shouldReturnTrueWhenUserCanUpdateChannel() {
+        final var user = UserFixture.createDefaultUser(1).build();
+        final var channel = ChannelFixture.createDefaultChannel(
+                1,
+                List.of(user),
+                List.of(),
+                List.of()
+        ).build();
 
+        boolean result = channelService.userHasPermissionToUpdateChannel(channel, user.getNickname());
+
+        assertThat(result, is(true));
+
+        verifyNoInteractions(channelRepository);
+    }
+
+    @Test
+    public void shouldReturnFalseWhenUserCanNotUpdateChannel() {
+        final var user1 = UserFixture.createDefaultUser(1).build();
+        final var user2 = UserFixture.createDefaultUser(2).build();
+        final var channel = ChannelFixture.createDefaultChannel(
+                1,
+                List.of(user2),
+                List.of(),
+                List.of()
+        ).build();
+
+        boolean result = channelService.userHasPermissionToUpdateChannel(channel, user2.getNickname());
+
+        assertThat(result, is(true));
+
+        verifyNoInteractions(channelRepository);
+    }
     //endregion
 
     //region updateChannel
+    @Test
+    public void shouldAddOwnerUpdateChannel() {
+        final var action = ChannelUpdateAction.ADD_OWNER;
+        final var userThatSendRequest = UserFixture.createDefaultUser(1).build();
+        final var userToManipulate = UserFixture.createDefaultUser(2).build();
 
+        final List<User> owners = new ArrayList<>();
+        owners.add(userThatSendRequest);
+
+        final var channel = ChannelFixture.createDefaultChannel(
+                1,
+                owners,
+                new ArrayList<>(),
+                List.of()
+        ).build();
+
+        when(channelRepository.save(ArgumentMatchers.any(Channel.class)))
+                .then(AdditionalAnswers.returnsFirstArg());
+
+        final var updatedChannel = channelService.updateChannel(channel, action, userToManipulate);
+
+        assertEquals(updatedChannel.getOwners().size(), 2);
+        assertEquals(updatedChannel.getOwners().get(0).getNickname(), "testNickname1");
+        assertEquals(updatedChannel.getOwners().get(1).getNickname(), "testNickname2");
+
+        assertEquals(updatedChannel.getMembers().size(), 0);
+
+        verify(channelRepository, times(1)).save(ArgumentMatchers.any(Channel.class));
+        verifyNoMoreInteractions(channelRepository);
+    }
+
+    @Test
+    public void shouldRemoveOwnerUpdateChannel() {
+        final var action = ChannelUpdateAction.REMOVE_OWNER;
+        final var userThatSendRequest = UserFixture.createDefaultUser(1).build();
+        final var userToManipulate = UserFixture.createDefaultUser(2).build();
+
+        final List<User> owners = new ArrayList<>();
+        owners.add(userThatSendRequest);
+        owners.add(userToManipulate);
+
+        final var channel = ChannelFixture.createDefaultChannel(
+                1,
+                owners,
+                new ArrayList<>(),
+                List.of()
+        ).build();
+
+        when(channelRepository.save(ArgumentMatchers.any(Channel.class)))
+                .then(AdditionalAnswers.returnsFirstArg());
+
+        final var updatedChannel = channelService.updateChannel(channel, action, userToManipulate);
+
+        assertEquals(updatedChannel.getOwners().size(), 1);
+        assertEquals(updatedChannel.getOwners().get(0).getNickname(), "testNickname1");
+        assertEquals(updatedChannel.getMembers().size(), 1);
+        assertEquals(updatedChannel.getMembers().get(0).getNickname(), "testNickname2");
+
+        verify(channelRepository, times(1)).save(ArgumentMatchers.any(Channel.class));
+        verifyNoMoreInteractions(channelRepository);
+    }
+
+    @Test
+    public void shouldAddMemberFirstTimeUpdateChannel() {
+        final var action = ChannelUpdateAction.ADD_MEMBER;
+        final var userThatSendRequest = UserFixture.createDefaultUser(1).build();
+        final var userToManipulate = UserFixture.createDefaultUser(2).build();
+
+        final List<User> owners = new ArrayList<>();
+        owners.add(userThatSendRequest);
+
+        final var channel = ChannelFixture.createDefaultChannel(
+                1,
+                owners,
+                new ArrayList<>(),
+                List.of()
+        ).build();
+
+        when(channelRepository.save(ArgumentMatchers.any(Channel.class)))
+                .then(AdditionalAnswers.returnsFirstArg());
+
+        final var updatedChannel = channelService.updateChannel(channel, action, userToManipulate);
+
+        assertEquals(updatedChannel.getOwners().size(), 1);
+        assertEquals(updatedChannel.getOwners().get(0).getNickname(), "testNickname1");
+        assertEquals(updatedChannel.getMembers().size(), 1);
+        assertEquals(updatedChannel.getMembers().get(0).getNickname(), "testNickname2");
+
+        verify(channelRepository, times(1)).save(ArgumentMatchers.any(Channel.class));
+        verifyNoMoreInteractions(channelRepository);
+    }
+
+    @Test
+    public void shouldNotAddMemberBecauseIsAlreadyMember() {
+        final var action = ChannelUpdateAction.ADD_MEMBER;
+        final var userThatSendRequest = UserFixture.createDefaultUser(1).build();
+        final var userToManipulate = UserFixture.createDefaultUser(2).build();
+
+        final List<User> owners = new ArrayList<>();
+        owners.add(userThatSendRequest);
+
+        final List<User> members = new ArrayList<>();
+        members.add(userToManipulate);
+
+        final var channel = ChannelFixture.createDefaultChannel(
+                1,
+                owners,
+                members,
+                List.of()
+        ).build();
+
+        when(channelRepository.save(ArgumentMatchers.any(Channel.class)))
+                .then(AdditionalAnswers.returnsFirstArg());
+
+        final var updatedChannel = channelService.updateChannel(channel, action, userToManipulate);
+
+        final var membersAfterSet = Sets.newHashSet(updatedChannel.getMembers());
+        final var membersAfter = new ArrayList<>(membersAfterSet);
+        assertEquals(updatedChannel.getOwners().size(), 1);
+        assertEquals(updatedChannel.getOwners().get(0).getNickname(), "testNickname1");
+        assertEquals(membersAfter.size(), 1);
+        assertEquals(membersAfter.get(0).getNickname(), "testNickname2");
+
+        verify(channelRepository, times(1)).save(ArgumentMatchers.any(Channel.class));
+        verifyNoMoreInteractions(channelRepository);
+    }
+
+    @Test
+    public void shouldRemoveMemberFirstTimeUpdateChannel() {
+        final var action = ChannelUpdateAction.REMOVE_MEMBER;
+        final var userThatSendRequest = UserFixture.createDefaultUser(1).build();
+        final var userToManipulate = UserFixture.createDefaultUser(2).build();
+
+        final List<User> owners = new ArrayList<>();
+        owners.add(userThatSendRequest);
+        final List<User> members = new ArrayList<>();
+        members.add(userToManipulate);
+
+        final var channel = ChannelFixture.createDefaultChannel(
+                1,
+                owners,
+                members,
+                List.of()
+        ).build();
+
+        when(channelRepository.save(ArgumentMatchers.any(Channel.class)))
+                .then(AdditionalAnswers.returnsFirstArg());
+
+        final var updatedChannel = channelService.updateChannel(channel, action, userToManipulate);
+
+        assertEquals(updatedChannel.getOwners().size(), 1);
+        assertEquals(updatedChannel.getOwners().get(0).getNickname(), "testNickname1");
+        assertEquals(updatedChannel.getMembers().size(), 0);
+
+        verify(channelRepository, times(1)).save(ArgumentMatchers.any(Channel.class));
+        verifyNoMoreInteractions(channelRepository);
+    }
     //endregion
 
     //region userHasPermissionToSeeChannel
+    @Test
+    public void shouldReturnTrueWhenUserIsOwner() {
+        final var user = UserFixture.createDefaultUser(1).build();
+        final var channel = ChannelFixture.createDefaultChannel(
+                1,
+                List.of(user),
+                List.of(),
+                List.of()
+        ).build();
 
+        boolean result = channelService.userHasPermissionToSeeChannel(channel, user.getNickname());
+
+        assertThat(result, is(true));
+        verifyNoInteractions(channelRepository);
+    }
+
+    @Test
+    public void shouldReturnTrueWhenUserIsMember() {
+        final var user = UserFixture.createDefaultUser(1).build();
+        final var channel = ChannelFixture.createDefaultChannel(
+                1,
+                List.of(),
+                List.of(user),
+                List.of()
+        ).build();
+
+        boolean result = channelService.userHasPermissionToSeeChannel(channel, user.getNickname());
+
+        assertThat(result, is(true));
+        verifyNoInteractions(channelRepository);
+    }
+
+    @Test
+    public void shouldReturnFalseWhenUserIsNonOwnerOrNotMember() {
+        final var user = UserFixture.createDefaultUser(1).build();
+        final var channel = ChannelFixture.createDefaultChannel(
+                1,
+                List.of(),
+                List.of(),
+                List.of()
+        ).build();
+
+        boolean result = channelService.userHasPermissionToSeeChannel(channel, user.getNickname());
+
+        assertThat(result, is(false));
+        verifyNoInteractions(channelRepository);
+    }
     //endregion
 
 }
