@@ -87,6 +87,7 @@ public class UserController {
 
     @Data
     @AllArgsConstructor
+    @NoArgsConstructor
     @Builder
     @NoArgsConstructor
     @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -103,6 +104,7 @@ public class UserController {
 
     @Data
     @AllArgsConstructor
+    @NoArgsConstructor
     @Builder
     @NoArgsConstructor
     @FieldDefaults(level = AccessLevel.PRIVATE)
