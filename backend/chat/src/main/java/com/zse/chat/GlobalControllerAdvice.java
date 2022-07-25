@@ -32,7 +32,7 @@ public class GlobalControllerAdvice {
             ChannelNotFoundException.class
     })
     public ExceptionResponse notFoundExceptionHandle(Exception notFoundException){
-        log.warn(notFoundException.getMessage());
+        log.warn("Generating not found response due to : {}", notFoundException.getMessage());
         return ExceptionResponse.builder()
                 .responseCode(HttpStatus.NOT_FOUND.value())
                 .exceptionMessage(notFoundException.getMessage())
@@ -43,7 +43,7 @@ public class GlobalControllerAdvice {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler({UserWithNickAlreadyExistsException.class, UserWithEmailAlreadyExistsExeption.class})
     public ExceptionResponse userAlreadyExists(Exception userExistsException){
-        log.warn(userExistsException.getMessage());
+        log.warn("Generating user already exists response due to : {}", userExistsException.getMessage());
         return ExceptionResponse.builder()
                 .responseCode(HttpStatus.BAD_REQUEST.value())
                 .exceptionMessage(userExistsException.getMessage())
@@ -54,7 +54,7 @@ public class GlobalControllerAdvice {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MissingPayloadFieldException.class)
     public ExceptionResponse missingArgument(Exception missingArgumentException){
-        log.warn(missingArgumentException.getMessage());
+        log.warn("Generating missing argument response due to: {}", missingArgumentException.getMessage());
         return ExceptionResponse.builder()
                 .responseCode(HttpStatus.BAD_REQUEST.value())
                 .exceptionMessage(missingArgumentException.getMessage())
@@ -79,7 +79,7 @@ public class GlobalControllerAdvice {
             ChannelAccessFailedException.class
     })
     public ExceptionResponse updateForbidden(Exception exception){
-        log.error(exception.getMessage());
+        log.error("Generating action forbidden response due to: {}", exception.getMessage());
         return ExceptionResponse.builder()
                 .responseCode(HttpStatus.FORBIDDEN.value())
                 .exceptionMessage(exception.getMessage())

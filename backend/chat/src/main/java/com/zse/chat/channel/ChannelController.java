@@ -47,7 +47,7 @@ public class ChannelController {
         final var user = userService.getUserByNick(channelCreateDTO.getNickname());
         final var channel = channelService.saveChannel(user);
 
-        log.info("Channel created with id: " + channel.getId());
+        log.info("Channel with id: {} has been created by {}", channel.getId(), user.getNickname());
         return createChannelResponseDTO(channel);
     }
 

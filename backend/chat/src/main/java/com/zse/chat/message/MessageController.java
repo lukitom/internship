@@ -1,7 +1,6 @@
 package com.zse.chat.message;
 
 import com.zse.chat.login.VerifyJWT;
-import com.zse.chat.user.User;
 import com.zse.chat.user.UserNickname;
 import com.zse.chat.user.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -85,7 +84,7 @@ public class MessageController {
             @PathVariable int id
     ){
         messageService.updateMessageById(id, messageRequestDTO, true);
-        log.info("Message deleted with id: " + id);
+        log.info("Message with id: {} has been deleted", id);
     }
 
     //region DTOs

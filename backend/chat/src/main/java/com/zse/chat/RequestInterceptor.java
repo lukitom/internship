@@ -17,9 +17,10 @@ public class RequestInterceptor implements HandlerInterceptor {
         final var requestPath = request.getServletPath();
 
         if(requestPath.equals("/error")){
-            log.error(requestType + " " + requestPath);
+            log.error("{} {}", requestType, requestPath);
         } else {
-            log.info(requestType + " " + requestPath);
+            log.info("{} {}", requestType, requestPath
+            );
         }
         return true;
     }

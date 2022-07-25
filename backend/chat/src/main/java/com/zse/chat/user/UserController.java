@@ -59,7 +59,7 @@ public class UserController {
     public UserResponseDTO createUser(@RequestBody CreateUserDTO createUserDTO){
         final var savedUser = userService.saveUser(createUserDTO);
 
-        log.info("User created with nickname: " + createUserDTO.getNickname());
+        log.info("User with nickname: {} has been created", createUserDTO.getNickname());
         return createUserResponseDTO(savedUser);
     }
 

@@ -45,7 +45,7 @@ public class VerifyUser {
         final HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         final String header = request.getHeader("Authorization");
         if (!StringUtils.hasText(header)){
-            log.warn("Missing JWT token. Endpoint: " + request.getMethod() + " " + request.getServletPath());
+            log.warn("Missing JWT token. Endpoint: {} {}", request.getMethod(), request.getServletPath());
             throw new MissingJWTException();
         }
         final String token = header.replace("Bearer ", "");
@@ -66,7 +66,8 @@ public class VerifyUser {
 
             return pjp.proceed(args);
         } catch (JWTVerificationException e){
-            log.error("Invalid JWT Token. Endpoint: " + request.getMethod() + " " + request.getServletPath());
+            log.error("Parsing Jwt token for : {} {} failed due to: {} ", request.getMethod(), request.getServletPath(), e.getMessage());
+
             throw new InvalidJWTException();
         }
     }

@@ -6,7 +6,6 @@ import com.zse.chat.login.VerifyJWT;
 import com.zse.chat.message.Message;
 import com.zse.chat.message.MessageController.MessageRequestDTO;
 import com.zse.chat.message.MessageController.MessageResponseDTO;
-import com.zse.chat.user.User;
 import com.zse.chat.user.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -108,7 +107,7 @@ public class MessageInChannelController {
         checkAccess(channel, messageRequestDTO.getNickname());
 
         messageChannelService.updateMessage(messageId, messageRequestDTO, channel, true);
-        log.info("Message deleted with id: " + messageId);
+        log.info("Message with id: {} has been deleted", messageId);
     }
 
     private MessageResponseDTO createMessageResponseDTO(Message message) {
