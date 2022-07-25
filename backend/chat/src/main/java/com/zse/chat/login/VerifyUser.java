@@ -7,6 +7,7 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.zse.chat.user.UserNickname;
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -18,10 +19,10 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
 
 @Aspect
 @Component
+@Slf4j
 public class VerifyUser {
 
     private final Environment env;
@@ -44,6 +45,7 @@ public class VerifyUser {
         final HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         final String header = request.getHeader("Authorization");
         if (!StringUtils.hasText(header)){
+            log.warn("Missing JWT token. Endpoint: " + request.getMethod() + " " + request.getServletPath());
             throw new MissingJWTException();
         }
         final String token = header.replace("Bearer ", "");
@@ -64,6 +66,7 @@ public class VerifyUser {
 
             return pjp.proceed(args);
         } catch (JWTVerificationException e){
+            log.error("Invalid JWT Token. Endpoint: " + request.getMethod() + " " + request.getServletPath());
             throw new InvalidJWTException();
         }
     }

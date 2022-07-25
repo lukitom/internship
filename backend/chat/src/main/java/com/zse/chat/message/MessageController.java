@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -19,6 +20,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @SecurityRequirement(name = "JWT")
+@Slf4j
 public class MessageController {
 
     private final MessageService messageService;
@@ -83,6 +85,7 @@ public class MessageController {
             @PathVariable int id
     ){
         messageService.updateMessageById(id, messageRequestDTO, true);
+        log.info("Message deleted with id: " + id);
     }
 
     //region DTOs

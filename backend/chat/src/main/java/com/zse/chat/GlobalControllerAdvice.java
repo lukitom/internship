@@ -13,6 +13,7 @@ import com.zse.chat.user.UserWithEmailAlreadyExistsExeption;
 import com.zse.chat.user.UserWithNickAlreadyExistsException;
 import lombok.Builder;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.time.LocalDateTime;
 
 @RestControllerAdvice
+@Slf4j
 public class GlobalControllerAdvice {
 
     @ResponseStatus(HttpStatus.NOT_FOUND)
@@ -30,6 +32,7 @@ public class GlobalControllerAdvice {
             ChannelNotFoundException.class
     })
     public ExceptionResponse notFoundExceptionHandle(Exception notFoundException){
+        log.warn(notFoundException.getMessage());
         return ExceptionResponse.builder()
                 .responseCode(HttpStatus.NOT_FOUND.value())
                 .exceptionMessage(notFoundException.getMessage())
@@ -40,6 +43,7 @@ public class GlobalControllerAdvice {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler({UserWithNickAlreadyExistsException.class, UserWithEmailAlreadyExistsExeption.class})
     public ExceptionResponse userAlreadyExists(Exception userExistsException){
+        log.warn(userExistsException.getMessage());
         return ExceptionResponse.builder()
                 .responseCode(HttpStatus.BAD_REQUEST.value())
                 .exceptionMessage(userExistsException.getMessage())
@@ -50,6 +54,7 @@ public class GlobalControllerAdvice {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MissingPayloadFieldException.class)
     public ExceptionResponse missingArgument(Exception missingArgumentException){
+        log.warn(missingArgumentException.getMessage());
         return ExceptionResponse.builder()
                 .responseCode(HttpStatus.BAD_REQUEST.value())
                 .exceptionMessage(missingArgumentException.getMessage())
@@ -74,6 +79,7 @@ public class GlobalControllerAdvice {
             ChannelAccessFailedException.class
     })
     public ExceptionResponse updateForbidden(Exception exception){
+        log.error(exception.getMessage());
         return ExceptionResponse.builder()
                 .responseCode(HttpStatus.FORBIDDEN.value())
                 .exceptionMessage(exception.getMessage())
