@@ -1,41 +1,71 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
+import axios from 'axios';
+const BASE_URL: string = process.env.REACT_APP_SERVER_HOST || 'http://localhost:8080';
 
 async function loginUser(verification: any) {
-    return fetch('http://localhost:3000/Login', {
-        method: 'POST',
+    axios.post(BASE_URL + '/login', {
         headers: {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify(verification)
     })
-        .then(data => data.json())
-}
+        .then((data) => {
+            console.log(data);
+        }, (error) => {
+            alert(error)
+        })
+};
 
-export default function Login ({ setToken }: {setToken: any}) {
+export default function Login({ setToken }: { setToken: any }) {
     const [username, setUserName] = useState();
 
     const handleSubmit = async (e: any) => {
         e.preventDefault();
         const token = await loginUser({
-            username
-        });
+            nickname: username
+        }); console.log(token)
         setToken(token);
     }
 
     return (
-        <div className="login-wrapper">
+        <div className='login-wrapper' style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexDirection: 'column'
+        }}>
             <h1>Zaloguj się</h1>
             <form onSubmit={handleSubmit}>
                 <label>
-                    <input type="text" placeholder='Login' onChange={(e: any) => setUserName(e.target.value)} />
-                </label>
+                    <input style={{
+                        border: 'solid 1',
+                        borderRadius: '10px',
+                        borderColor: 'green',
+                        padding: '5px',
+                        margin: '5px'
+                    }}
+
+                        type='text' placeholder='Login' onChange={(e: any) => setUserName(e.target.value)} />
+                </label><br />
                 <label>
-                    <input type="password" placeholder='Password' disabled />
-                </label>
-                <div>
-                    <button type="submit">Submit</button>
-                </div>
+                    <input style={{
+                        border: 'solid 1',
+                        borderRadius: '10px',
+                        borderColor: 'gray',
+                        padding: '5px',
+                        margin: '5px'
+                    }}
+
+                        type="password" placeholder='Password' disabled />
+                </label><br />
+
+                <button style={{
+                    display: 'center',
+                    border: 'solid 1',
+                    borderRadius: '10px'
+                }}
+                    type="submit">Submit</button>
             </form>
         </div>
     )
