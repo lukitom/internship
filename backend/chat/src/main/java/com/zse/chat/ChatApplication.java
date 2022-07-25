@@ -12,11 +12,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 @OpenAPIDefinition(
 		info = @Info(
-				title = "Chat Application App",
+				title = "Chat Application Api",
 				description = "Backend for chat application.",
 				version = "1.0.0"
 		),
-		servers = @Server(url = "http://localhost:8080")
+		servers = @Server(url = "${server.url}")
 )
 @SecurityScheme(name = "JWT", scheme = "Bearer", type = SecuritySchemeType.HTTP, in = SecuritySchemeIn.HEADER)
 public class ChatApplication {

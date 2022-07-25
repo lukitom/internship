@@ -29,3 +29,6 @@ management:
         include: "*"
 jwt:
   secret: ${JWT_SECRET:secret}
+
+server:
+  url: ${server_url:http://localhost:8080}
