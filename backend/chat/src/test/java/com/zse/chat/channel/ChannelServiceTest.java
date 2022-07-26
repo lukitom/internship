@@ -41,8 +41,8 @@ class ChannelServiceTest {
     //region getChannels()
     @Test
     public void shouldReturnChannelsWhereUserIsOwnerOrMember() {
-        List<Channel> channels = new ArrayList<>();
-        User user = UserFixture.createDefaultUser(1).build();
+        final List<Channel> channels = new ArrayList<>();
+        final var user = UserFixture.createDefaultUser(1).build();
 
         channels.add(
                 ChannelFixture.createDefaultChannel(
@@ -66,7 +66,7 @@ class ChannelServiceTest {
                 ArgumentMatchers.anyList()
         )).thenReturn(channels);
 
-        List<Channel> returnedChannels = channelService.getChannels(user);
+        final List<Channel> returnedChannels = channelService.getChannels(user);
 
         assertEquals(returnedChannels, channels);
 
@@ -79,15 +79,15 @@ class ChannelServiceTest {
 
     @Test
     public void shouldReturnEmptyArrayOfChannelsWhereUserIsOwnerOrMember() {
-        User user = UserFixture.createDefaultUser(1).build();
-        List<Channel> channels = new ArrayList<>();
+        final var user = UserFixture.createDefaultUser(1).build();
+        final List<Channel> channels = new ArrayList<>();
 
         when(channelRepository.getChannelsByOwnersInOrMembersIn(
                 ArgumentMatchers.anyList(),
                 ArgumentMatchers.anyList()
         )).thenReturn(channels);
 
-        List<Channel> returnedChannels = channelService.getChannels(user);
+        final List<Channel> returnedChannels = channelService.getChannels(user);
 
         assertThat(returnedChannels, is(empty()));
 
@@ -111,7 +111,7 @@ class ChannelServiceTest {
 
         when(channelRepository.findById(1)).thenReturn(Optional.of(channel));
 
-        Channel returnedChannel = channelService.getChannelById(1);
+        final var returnedChannel = channelService.getChannelById(1);
 
         assertEquals(returnedChannel, channel);
 
@@ -174,14 +174,14 @@ class ChannelServiceTest {
         final var user2 = UserFixture.createDefaultUser(2).build();
         final var channel = ChannelFixture.createDefaultChannel(
                 1,
-                List.of(user2),
+                List.of(user1),
                 List.of(),
                 List.of()
         ).build();
 
         boolean result = channelService.userHasPermissionToUpdateChannel(channel, user2.getNickname());
 
-        assertThat(result, is(true));
+        assertThat(result, is(false));
 
         verifyNoInteractions(channelRepository);
     }

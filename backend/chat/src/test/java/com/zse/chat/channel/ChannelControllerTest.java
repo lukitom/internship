@@ -1,5 +1,7 @@
 package com.zse.chat.channel;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zse.chat.login.LoginController;
 import com.zse.chat.login.VerifyUser;
@@ -7,7 +9,7 @@ import com.zse.chat.message.MessageFixture;
 import com.zse.chat.user.User;
 import com.zse.chat.user.UserFixture;
 import com.zse.chat.user.UserService;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -18,10 +20,13 @@ import org.springframework.boot.autoconfigure.aop.AopAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
+import java.sql.Date;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
@@ -51,7 +56,7 @@ class ChannelControllerTest {
     private UserService userService;
 
     //region fixture
-    private String tokenJWT;
+    private static String tokenJWT;
 
     public static Stream<MockHttpServletRequestBuilder> paths() {
         return Stream.of(
@@ -61,31 +66,28 @@ class ChannelControllerTest {
         );
     }
 
-    @BeforeEach
-    void setUp() throws Exception {
-        if (tokenJWT != null){
-            return;
-        }
-
-        final var token =mockMvc.perform(post("/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"nickname\": \"testNickname1\"}"))
-                .andReturn();
-
-        tokenJWT = token.getResponse().getContentAsString();
+    @BeforeAll
+    static void beforeAll() {
+        final var secret = "secretForJWTtoKEn";
+        tokenJWT = JWT.create()
+                .withClaim("nickname", "testNickname1")
+                .withExpiresAt(Date.valueOf(LocalDate.now().plusDays(7)))
+                .sign(Algorithm.HMAC256(secret));
     }
 
-    private MockHttpServletRequestBuilder authorize(MockHttpServletRequestBuilder pathBuilder){
-        return pathBuilder.header("Authorization", "Bearer " + tokenJWT);
+    private HttpHeaders authorize(){
+        final var header = new HttpHeaders();
+        header.setBearerAuth(tokenJWT);
+        return header;
     }
     //endregion
 
     //region GET("/channels")
     @Test
     public void shouldReturnAllAvailableToSeeChannelsForUser() throws Exception {
-        User user = UserFixture.createDefaultUser(1).build();
+        final var user = UserFixture.createDefaultUser(1).build();
 
-        List<Channel> channels = new ArrayList<>();
+        final List<Channel> channels = new ArrayList<>();
 
         for (int i = 0; i < 5; i++) {
             channels.add(
@@ -102,7 +104,7 @@ class ChannelControllerTest {
         when(channelService.getChannels(ArgumentMatchers.any(User.class)))
                 .thenReturn(channels);
 
-        mockMvc.perform(authorize(get("/channels")))
+        mockMvc.perform(get("/channels").headers(authorize()))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(5)));
@@ -110,13 +112,12 @@ class ChannelControllerTest {
 
     @Test
     public void shouldReturnEmptyArrayOfAvailableChannelsForUser() throws Exception {
-        User user = UserFixture.createDefaultUser(1).build();
-        List<Channel> channels = new ArrayList<>();
+        final var user = UserFixture.createDefaultUser(1).build();
 
         when(userService.getUserByNick("testNickname1")).thenReturn(user);
-        when(channelService.getChannels(ArgumentMatchers.any(User.class))).thenReturn(channels);
+        when(channelService.getChannels(ArgumentMatchers.any(User.class))).thenReturn(List.of());
 
-        mockMvc.perform(authorize(get("/channels")))
+        mockMvc.perform(get("/channels").headers(authorize()))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(0)));
@@ -126,8 +127,8 @@ class ChannelControllerTest {
     //region POST("/channels")
     @Test
     public void shouldCreateChannel() throws Exception {
-        User user = UserFixture.createDefaultUser(1).build();
-        Channel channel = ChannelFixture.createDefaultChannel(
+        final var user = UserFixture.createDefaultUser(1).build();
+        final var channel = ChannelFixture.createDefaultChannel(
                 1,
                 UserFixture.createListOfDefaultUser(1),
                 UserFixture.createListOfDefaultUser(2, 1),
@@ -137,15 +138,15 @@ class ChannelControllerTest {
         when(userService.getUserByNick("testNickname1")).thenReturn(user);
         when(channelService.saveChannel(user)).thenReturn(channel);
 
-        mockMvc.perform(authorize(post("/channels")))
+        mockMvc.perform(post("/channels").headers(authorize()))
                 .andDo(print())
                 .andExpect(status().isOk());
     }
 
     @Test
     public void shouldValidateCreateChannelResponse() throws Exception {
-        User user = UserFixture.createDefaultUser(1).build();
-        Channel channel = ChannelFixture.createDefaultChannel(
+        final var user = UserFixture.createDefaultUser(1).build();
+        final var channel = ChannelFixture.createDefaultChannel(
                 1,
                 UserFixture.createListOfDefaultUser(1),
                 UserFixture.createListOfDefaultUser(2, 1),
@@ -155,7 +156,7 @@ class ChannelControllerTest {
         when(userService.getUserByNick("testNickname1")).thenReturn(user);
         when(channelService.saveChannel(user)).thenReturn(channel);
 
-        mockMvc.perform(authorize(post("/channels")))
+        mockMvc.perform(post("/channels").headers(authorize()))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", equalTo(1)))
@@ -172,10 +173,10 @@ class ChannelControllerTest {
     public void shouldAddChannelOwner() throws Exception {
         final var userToManipulate = UserFixture.createDefaultUser(2).build();
 
-        List<User> ownersBefore = UserFixture.createListOfDefaultUser(1);
-        List<User> ownersAfter = UserFixture.createListOfDefaultUser(2);
-        List<User> membersBefore = UserFixture.createListOfDefaultUser(2, 1);
-        List<User> membersAfter = new ArrayList<>();
+        final List<User> ownersBefore = UserFixture.createListOfDefaultUser(1);
+        final List<User> ownersAfter = UserFixture.createListOfDefaultUser(2);
+        final List<User> membersBefore = UserFixture.createListOfDefaultUser(2, 1);
+        final List<User> membersAfter = new ArrayList<>();
 
         final var channel = ChannelFixture.createDefaultChannel(
                 1,
@@ -204,7 +205,7 @@ class ChannelControllerTest {
                             .members(membersAfter)
                             .build());
 
-        mockMvc.perform(authorize(put("/channels/users"))
+        mockMvc.perform(put("/channels/users").headers(authorize())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andDo(print())
@@ -220,10 +221,10 @@ class ChannelControllerTest {
     public void shouldRemoveChannelOwner() throws Exception {
         final var userToManipulate = UserFixture.createDefaultUser(2).build();
 
-        List<User> ownersBefore = UserFixture.createListOfDefaultUser(2);
-        List<User> ownersAfter = UserFixture.createListOfDefaultUser(1);
-        List<User> membersBefore = new ArrayList<>();
-        List<User> membersAfter = UserFixture.createListOfDefaultUser(2,1);
+        final List<User> ownersBefore = UserFixture.createListOfDefaultUser(2);
+        final List<User> ownersAfter = UserFixture.createListOfDefaultUser(1);
+        final List<User> membersBefore = new ArrayList<>();
+        final List<User> membersAfter = UserFixture.createListOfDefaultUser(2,1);
 
         final var channel = ChannelFixture.createDefaultChannel(
                 1,
@@ -253,7 +254,8 @@ class ChannelControllerTest {
                         .members(membersAfter)
                         .build());
 
-        mockMvc.perform(authorize(put("/channels/users"))
+        mockMvc.perform(put("/channels/users")
+                        .headers(authorize())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andDo(print())
@@ -269,9 +271,9 @@ class ChannelControllerTest {
     public void shouldAddChannelMember() throws Exception {
         final var userToManipulate = UserFixture.createDefaultUser(2).build();
 
-        List<User> owners = UserFixture.createListOfDefaultUser(1);
-        List<User> membersBefore = new ArrayList<>();
-        List<User> membersAfter = UserFixture.createListOfDefaultUser(2,1);
+        final List<User> owners = UserFixture.createListOfDefaultUser(1);
+        final List<User> membersBefore = new ArrayList<>();
+        final List<User> membersAfter = UserFixture.createListOfDefaultUser(2,1);
 
         final var channel = ChannelFixture.createDefaultChannel(
                 1,
@@ -301,7 +303,8 @@ class ChannelControllerTest {
                         .members(membersAfter)
                         .build());
 
-        mockMvc.perform(authorize(put("/channels/users"))
+        mockMvc.perform(put("/channels/users")
+                        .headers(authorize())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andDo(print())
@@ -317,9 +320,9 @@ class ChannelControllerTest {
     public void shouldRemoveChannelMember() throws Exception {
         final var userToManipulate = UserFixture.createDefaultUser(2).build();
 
-        List<User> owners = UserFixture.createListOfDefaultUser(1);
-        List<User> membersBefore = UserFixture.createListOfDefaultUser(2,1);
-        List<User> membersAfter = new ArrayList<>();
+        final List<User> owners = UserFixture.createListOfDefaultUser(1);
+        final List<User> membersBefore = UserFixture.createListOfDefaultUser(2,1);
+        final List<User> membersAfter = new ArrayList<>();
 
         final var channel = ChannelFixture.createDefaultChannel(
                 1,
@@ -349,7 +352,8 @@ class ChannelControllerTest {
                         .members(membersAfter)
                         .build());
 
-        mockMvc.perform(authorize(put("/channels/users"))
+        mockMvc.perform(put("/channels/users")
+                        .headers(authorize())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andDo(print())
@@ -387,7 +391,8 @@ class ChannelControllerTest {
                 ArgumentMatchers.any(Channel.class), eq("testNickname1")))
                 .thenReturn(false);
 
-        mockMvc.perform(authorize(put("/channels/users"))
+        mockMvc.perform(put("/channels/users")
+                        .headers(authorize())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andDo(print())

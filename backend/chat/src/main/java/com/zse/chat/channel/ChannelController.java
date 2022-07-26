@@ -7,8 +7,12 @@ import com.zse.chat.user.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.*;
-import lombok.experimental.FieldDefaults;
+import lombok.Builder;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.Value;
+import lombok.experimental.NonFinal;
+import lombok.extern.jackson.Jacksonized;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -64,25 +68,21 @@ public class ChannelController {
     }
 
     //region DTOs
-    @Data
+    @Value
     @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @FieldDefaults(level = AccessLevel.PRIVATE)
+    @Jacksonized
     static class ChannelRequestDTO implements UserNickname {
         Integer id;
+        @Setter
+        @NonFinal
         String nickname;
         String userNickname;
         ChannelUpdateAction action;
     }
 
-    @Data
     @Builder
-    @FieldDefaults(level = AccessLevel.PRIVATE)
-    static class ChannelResponseDTO {
-        int id;
-        List<String> owners;
-        List<String> members;
+    @Jacksonized
+    record ChannelResponseDTO(int id, List<String> owners, List<String> members) {
     }
     //endregion
 
