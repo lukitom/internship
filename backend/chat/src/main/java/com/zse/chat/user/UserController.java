@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,6 +17,7 @@ import java.util.Optional;
 @RequestMapping("/users")
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 public class UserController {
 
     private final UserService userService;
@@ -57,6 +59,7 @@ public class UserController {
     public UserResponseDTO createUser(@RequestBody CreateUserDTO createUserDTO){
         final var savedUser = userService.saveUser(createUserDTO);
 
+        log.info("User with nickname: {} has been created", createUserDTO.getNickname());
         return createUserResponseDTO(savedUser);
     }
 

@@ -10,7 +10,6 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-        format_sql: true
     show-sql: true
   jackson:
     default-property-inclusion: non_null
@@ -29,3 +28,7 @@ management:
         include: "*"
 jwt:
   secret: ${JWT_SECRET:secret}
+
+server:
+  servlet:
+    context-path: /
