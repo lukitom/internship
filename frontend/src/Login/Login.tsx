@@ -1,20 +1,15 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import PropTypes from 'prop-types';
 import axios from 'axios';
 const BASE_URL: string = process.env.REACT_APP_SERVER_HOST || 'http://localhost:8080';
 
 async function loginUser(verification: any) {
-    axios.post(BASE_URL + '/login', {
-        headers: {},
-        data: {
-            foo: 'bar'
-        }
+    return await axios({
+        method: 'post',
+        url: BASE_URL + '/login',
+        data: verification
     })
-        .then((data) => {
-            console.log(data);
-        }, (error) => {
-            alert(error)
-        })
+        .then (res => res.data);
 };
 
 export default function Login({ setToken }: { setToken: any }) {
@@ -25,7 +20,6 @@ export default function Login({ setToken }: { setToken: any }) {
         const token = await loginUser({
             nickname: username
         }); 
-        console.log(token)
         setToken(token);
     }
 
