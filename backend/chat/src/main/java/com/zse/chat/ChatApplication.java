@@ -16,7 +16,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 				description = "Backend for chat application.",
 				version = "1.0.0"
 		),
-		servers = @Server(url = "${server.url}")
+		servers = @Server(url = "${swagger.url}")
 )
 @SecurityScheme(name = "JWT", scheme = "Bearer", type = SecuritySchemeType.HTTP, in = SecuritySchemeIn.HEADER)
 public class ChatApplication {
