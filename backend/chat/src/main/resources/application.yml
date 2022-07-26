@@ -30,5 +30,8 @@ management:
 jwt:
   secret: ${JWT_SECRET:secret}
 
-server:
+swagger:
   url: ${server_url:http://localhost:8080}
+server:
+  servlet:
+    context-path: /
