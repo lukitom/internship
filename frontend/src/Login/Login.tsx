@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
 import axios from 'axios';
-const BASE_URL: string = process.env.REACT_APP_SERVER_HOST || 'http://localhost:8080';
+const BACKEND_BASE_URL: string = process.env.REACT_APP_SERVER_HOST || 'http://localhost:8080';
 
 async function loginUser(verification: any) {
     return await axios({
         method: 'post',
-        url: BASE_URL + '/login',
+        url: BACKEND_BASE_URL + '/login',
         data: verification
     })
         .then (res => res.data);
