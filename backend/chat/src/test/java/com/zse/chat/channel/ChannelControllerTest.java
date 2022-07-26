@@ -9,7 +9,7 @@ import com.zse.chat.message.MessageFixture;
 import com.zse.chat.user.User;
 import com.zse.chat.user.UserFixture;
 import com.zse.chat.user.UserService;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -20,6 +20,7 @@ import org.springframework.boot.autoconfigure.aop.AopAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -33,7 +34,7 @@ import java.util.stream.Stream;
 
 import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -48,6 +49,9 @@ class ChannelControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private Environment env;
 
     @MockBean
     private ChannelService channelService;
@@ -66,16 +70,16 @@ class ChannelControllerTest {
         );
     }
 
-    @BeforeAll
-    static void beforeAll() {
-        final var secret = "secretForJWTtoKEn";
+    @BeforeEach
+    void setUp() {
+        final var secret = env.getProperty("jwt.secret");
         tokenJWT = JWT.create()
                 .withClaim("nickname", "testNickname1")
                 .withExpiresAt(Date.valueOf(LocalDate.now().plusDays(7)))
                 .sign(Algorithm.HMAC256(secret));
     }
 
-    private HttpHeaders authorize(){
+    private HttpHeaders authorize() {
         final var header = new HttpHeaders();
         header.setBearerAuth(tokenJWT);
         return header;
@@ -84,7 +88,7 @@ class ChannelControllerTest {
 
     //region GET("/channels")
     @Test
-    public void shouldReturnAllAvailableToSeeChannelsForUser() throws Exception {
+    public void shouldReturnChannels() throws Exception {
         final var user = UserFixture.createDefaultUser(1).build();
 
         final List<Channel> channels = new ArrayList<>();
@@ -108,6 +112,12 @@ class ChannelControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(5)));
+
+        verify(userService, times(1)).getUserByNick("testNickname1");
+        verify(channelService, times(1)).getChannels(user);
+
+        verifyNoMoreInteractions(channelService);
+        verifyNoMoreInteractions(userService);
     }
 
     @Test
@@ -121,6 +131,12 @@ class ChannelControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(0)));
+
+        verify(userService, times(1)).getUserByNick("testNickname1");
+        verify(channelService, times(1)).getChannels(user);
+
+        verifyNoMoreInteractions(channelService);
+        verifyNoMoreInteractions(userService);
     }
     //endregion
 
@@ -141,6 +157,12 @@ class ChannelControllerTest {
         mockMvc.perform(post("/channels").headers(authorize()))
                 .andDo(print())
                 .andExpect(status().isOk());
+
+        verify(userService, times(1)).getUserByNick("testNickname1");
+        verify(channelService, times(1)).saveChannel(user);
+
+        verifyNoMoreInteractions(channelService);
+        verifyNoMoreInteractions(userService);
     }
 
     @Test
@@ -164,6 +186,12 @@ class ChannelControllerTest {
                 .andExpect(jsonPath("$.owners[0]", equalTo("testNickname1")))
                 .andExpect(jsonPath("$.members", hasSize(1)))
                 .andExpect(jsonPath("$.members[0]", equalTo("testNickname2")));
+
+        verify(userService, times(1)).getUserByNick("testNickname1");
+        verify(channelService, times(1)).saveChannel(user);
+
+        verifyNoMoreInteractions(channelService);
+        verifyNoMoreInteractions(userService);
     }
 
     //endregion
@@ -201,9 +229,9 @@ class ChannelControllerTest {
         when(userService.getUserByNick("testNickname2")).thenReturn(userToManipulate);
         when(channelService.updateChannel(channel, action, userToManipulate))
                 .thenReturn(channel.toBuilder()
-                            .owners(ownersAfter)
-                            .members(membersAfter)
-                            .build());
+                        .owners(ownersAfter)
+                        .members(membersAfter)
+                        .build());
 
         mockMvc.perform(put("/channels/users").headers(authorize())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -215,6 +243,14 @@ class ChannelControllerTest {
                 .andExpect(jsonPath("$.owners[0]", equalTo("testNickname1")))
                 .andExpect(jsonPath("$.owners[1]", equalTo("testNickname2")))
                 .andExpect(jsonPath("$.members", hasSize(0)));
+
+        verify(channelService, times(1)).getChannelById(1);
+        verify(channelService, times((1))).userHasPermissionToUpdateChannel(channel, "testNickname1");
+        verify(userService, times(1)).getUserByNick("testNickname2");
+        verify(channelService, times(1)).updateChannel(channel, action, userToManipulate);
+
+        verifyNoMoreInteractions(channelService);
+        verifyNoMoreInteractions(userService);
     }
 
     @Test
@@ -224,7 +260,7 @@ class ChannelControllerTest {
         final List<User> ownersBefore = UserFixture.createListOfDefaultUser(2);
         final List<User> ownersAfter = UserFixture.createListOfDefaultUser(1);
         final List<User> membersBefore = new ArrayList<>();
-        final List<User> membersAfter = UserFixture.createListOfDefaultUser(2,1);
+        final List<User> membersAfter = UserFixture.createListOfDefaultUser(2, 1);
 
         final var channel = ChannelFixture.createDefaultChannel(
                 1,
@@ -265,6 +301,14 @@ class ChannelControllerTest {
                 .andExpect(jsonPath("$.owners[0]", equalTo("testNickname1")))
                 .andExpect(jsonPath("$.members", hasSize(1)))
                 .andExpect(jsonPath("$.members[0]", equalTo("testNickname2")));
+
+        verify(channelService, times(1)).getChannelById(1);
+        verify(channelService, times((1))).userHasPermissionToUpdateChannel(channel, "testNickname1");
+        verify(userService, times(1)).getUserByNick("testNickname2");
+        verify(channelService, times(1)).updateChannel(channel, action, userToManipulate);
+
+        verifyNoMoreInteractions(channelService);
+        verifyNoMoreInteractions(userService);
     }
 
     @Test
@@ -273,7 +317,7 @@ class ChannelControllerTest {
 
         final List<User> owners = UserFixture.createListOfDefaultUser(1);
         final List<User> membersBefore = new ArrayList<>();
-        final List<User> membersAfter = UserFixture.createListOfDefaultUser(2,1);
+        final List<User> membersAfter = UserFixture.createListOfDefaultUser(2, 1);
 
         final var channel = ChannelFixture.createDefaultChannel(
                 1,
@@ -314,6 +358,14 @@ class ChannelControllerTest {
                 .andExpect(jsonPath("$.owners[0]", equalTo("testNickname1")))
                 .andExpect(jsonPath("$.members", hasSize(1)))
                 .andExpect(jsonPath("$.members[0]", equalTo("testNickname2")));
+
+        verify(channelService, times(1)).getChannelById(1);
+        verify(channelService, times((1))).userHasPermissionToUpdateChannel(channel, "testNickname1");
+        verify(userService, times(1)).getUserByNick("testNickname2");
+        verify(channelService, times(1)).updateChannel(channel, action, userToManipulate);
+
+        verifyNoMoreInteractions(channelService);
+        verifyNoMoreInteractions(userService);
     }
 
     @Test
@@ -321,7 +373,7 @@ class ChannelControllerTest {
         final var userToManipulate = UserFixture.createDefaultUser(2).build();
 
         final List<User> owners = UserFixture.createListOfDefaultUser(1);
-        final List<User> membersBefore = UserFixture.createListOfDefaultUser(2,1);
+        final List<User> membersBefore = UserFixture.createListOfDefaultUser(2, 1);
         final List<User> membersAfter = new ArrayList<>();
 
         final var channel = ChannelFixture.createDefaultChannel(
@@ -362,8 +414,15 @@ class ChannelControllerTest {
                 .andExpect(jsonPath("$.owners", hasSize(1)))
                 .andExpect(jsonPath("$.owners[0]", equalTo("testNickname1")))
                 .andExpect(jsonPath("$.members", hasSize(0)));
+
+        verify(channelService, times(1)).getChannelById(1);
+        verify(channelService, times((1))).userHasPermissionToUpdateChannel(channel, "testNickname1");
+        verify(userService, times(1)).getUserByNick("testNickname2");
+        verify(channelService, times(1)).updateChannel(channel, action, userToManipulate);
+
+        verifyNoMoreInteractions(channelService);
+        verifyNoMoreInteractions(userService);
     }
-    //TODO: check the rest of cases
 
     @ParameterizedTest
     @EnumSource(ChannelUpdateAction.class)
@@ -422,6 +481,9 @@ class ChannelControllerTest {
                 .andExpect(jsonPath("$.responseCode", equalTo(401)))
                 .andExpect(jsonPath("$.exceptionMessage",
                         equalTo("Missing authentication token")));
+
+        verifyNoInteractions(channelService);
+        verifyNoInteractions(userService);
     }
 
     @ParameterizedTest
@@ -443,6 +505,9 @@ class ChannelControllerTest {
                 .andExpect(jsonPath("$.responseCode", equalTo(401)))
                 .andExpect(jsonPath("$.exceptionMessage",
                         equalTo("Provided authentication token is invalid")));
+
+        verifyNoInteractions(channelService);
+        verifyNoInteractions(userService);
     }
     //endregion
 
