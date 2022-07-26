@@ -5,10 +5,10 @@ const BASE_URL: string = process.env.REACT_APP_SERVER_HOST || 'http://localhost:
 
 async function loginUser(verification: any) {
     axios.post(BASE_URL + '/login', {
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(verification)
+        headers: {},
+        data: {
+            foo: 'bar'
+        }
     })
         .then((data) => {
             console.log(data);
@@ -24,7 +24,8 @@ export default function Login({ setToken }: { setToken: any }) {
         e.preventDefault();
         const token = await loginUser({
             nickname: username
-        }); console.log(token)
+        }); 
+        console.log(token)
         setToken(token);
     }
 
@@ -70,7 +71,6 @@ export default function Login({ setToken }: { setToken: any }) {
         </div>
     )
 }
-
 Login.propTypes = {
     setToken: PropTypes.func.isRequired
 };
