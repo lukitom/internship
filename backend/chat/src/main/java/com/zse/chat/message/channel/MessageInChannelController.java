@@ -6,7 +6,6 @@ import com.zse.chat.login.VerifyJWT;
 import com.zse.chat.message.Message;
 import com.zse.chat.message.MessageController.MessageRequestDTO;
 import com.zse.chat.message.MessageController.MessageResponseDTO;
-import com.zse.chat.user.User;
 import com.zse.chat.user.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -41,7 +40,7 @@ public class MessageInChannelController {
         final var channel = channelService.getChannelById(channelId);
         checkAccess(channel, messageRequestDTO.getNickname());
 
-        final List<Message> messages = messageChannelService.getMessages(channel);
+        final List<Message> messages = channel.getMessages();
 
         return messages.stream()
                 .map(this::createMessageResponseDTO).toList();
