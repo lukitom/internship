@@ -44,10 +44,16 @@ public class ChannelService {
 
         switch (action){
             case ADD_OWNER -> {
+                if (owners.contains(manipulateUser)) {
+                    return channel;
+                }
                 owners.add(manipulateUser);
                 members.remove(manipulateUser);
             }
             case REMOVE_OWNER -> {
+                if (owners.size() == 1) {
+                    return channel;
+                }
                 owners.remove(manipulateUser);
                 members.add(manipulateUser);
             }
