@@ -13,6 +13,7 @@ import lombok.Setter;
 import lombok.Value;
 import lombok.experimental.NonFinal;
 import lombok.extern.jackson.Jacksonized;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -23,6 +24,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @SecurityRequirement(name = "JWT")
+@Slf4j
 public class MessageController {
 
     private final MessageService messageService;
@@ -87,6 +89,7 @@ public class MessageController {
             @PathVariable int id
     ){
         messageService.updateMessageById(id, messageRequestDTO, true);
+        log.info("Message with id: {} has been deleted", id);
     }
 
     //region DTOs

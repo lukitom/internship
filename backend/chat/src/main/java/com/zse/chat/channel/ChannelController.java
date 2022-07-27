@@ -13,6 +13,7 @@ import lombok.Setter;
 import lombok.Value;
 import lombok.experimental.NonFinal;
 import lombok.extern.jackson.Jacksonized;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,6 +23,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @SecurityRequirement(name = "JWT")
+@Slf4j
 public class ChannelController {
 
     private final ChannelService channelService;
@@ -46,6 +48,7 @@ public class ChannelController {
         final var user = userService.getUserByNick(channelCreateDTO.getNickname());
         final var channel = channelService.saveChannel(user);
 
+        log.info("Channel with id: {} has been created by {}", channel.getId(), user.getNickname());
         return createChannelResponseDTO(channel);
     }
 
