@@ -3,7 +3,6 @@ package com.zse.chat.channel;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.zse.chat.login.LoginController;
 import com.zse.chat.login.VerifyUser;
 import com.zse.chat.message.MessageFixture;
 import com.zse.chat.user.User;
@@ -40,7 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest({ChannelController.class, LoginController.class})
+@WebMvcTest(ChannelController.class)
 @Import({AopAutoConfiguration.class, VerifyUser.class})
 class ChannelControllerTest {
 

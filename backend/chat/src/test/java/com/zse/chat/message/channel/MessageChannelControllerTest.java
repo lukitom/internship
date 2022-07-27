@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zse.chat.channel.Channel;
 import com.zse.chat.channel.ChannelFixture;
 import com.zse.chat.channel.ChannelService;
-import com.zse.chat.login.LoginController;
 import com.zse.chat.login.VerifyUser;
 import com.zse.chat.message.MessageController;
 import com.zse.chat.message.MessageFixture;
@@ -15,7 +14,9 @@ import com.zse.chat.user.UserFixture;
 import com.zse.chat.user.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
+import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.aop.AopAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -31,19 +32,18 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest({MessageInChannelController.class, LoginController.class})
+@WebMvcTest(MessageChannelController.class)
 @Import({AopAutoConfiguration.class, VerifyUser.class})
-class MessageInChannelControllerTest {
+class MessageChannelControllerTest {
 
-    //region fixture
-    private static String tokenJWT;
     @Autowired
     private ObjectMapper mapper;
     @Autowired
@@ -56,6 +56,9 @@ class MessageInChannelControllerTest {
     private UserService userService;
     @MockBean
     private ChannelService channelService;
+
+    //region fixture
+    private static String tokenJWT;
 
     @BeforeEach
     void setUp() {
@@ -71,6 +74,9 @@ class MessageInChannelControllerTest {
         header.setBearerAuth(tokenJWT);
         return header;
     }
+
+    @Captor
+    ArgumentCaptor<MessageController.MessageRequestDTO> captor;
     //endregion
 
     //region GET("/messages/channels/{channelId}")
@@ -94,6 +100,13 @@ class MessageInChannelControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(10)));
+
+        verify(channelService, times(1)).getChannelById(1);
+        verify(channelService, times(1)).userHasPermissionToSeeChannel(channel, "testNickname1");
+
+        verifyNoMoreInteractions(channelService);
+        verifyNoInteractions(userService);
+        verifyNoInteractions(messageChannelService);
     }
 
     @Test
@@ -115,6 +128,13 @@ class MessageInChannelControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(0)));
+
+        verify(channelService, times(1)).getChannelById(1);
+        verify(channelService, times(1)).userHasPermissionToSeeChannel(channel, "testNickname1");
+
+        verifyNoMoreInteractions(channelService);
+        verifyNoInteractions(userService);
+        verifyNoInteractions(messageChannelService);
     }
 
     @Test
@@ -138,6 +158,13 @@ class MessageInChannelControllerTest {
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.responseCode", equalTo(403)))
                 .andExpect(jsonPath("$.exceptionMessage", containsString("not possible")));
+
+        verify(channelService, times(1)).getChannelById(1);
+        verify(channelService, times(1)).userHasPermissionToSeeChannel(channel, "testNickname1");
+
+        verifyNoMoreInteractions(channelService);
+        verifyNoInteractions(userService);
+        verifyNoInteractions(messageChannelService);
     }
     //endregion
 
@@ -172,6 +199,23 @@ class MessageInChannelControllerTest {
                         .content(body))
                 .andDo(print())
                 .andExpect(status().isOk());
+
+        verify(channelService, times(1)).getChannelById(1);
+        verify(userService, times(1)).getUserByNick("testNickname1");
+
+        verify(messageChannelService, times(1)).saveMessage(
+                captor.capture(),
+                eq(user),
+                eq(channel)
+        );
+        assertThat(captor.getValue().getNickname(), equalTo("testNickname1"));
+        assertThat(captor.getValue().getContent(), equalTo("testContent1"));
+
+        verify(channelService, times(1)).userHasPermissionToSeeChannel(channel, "testNickname1");
+
+        verifyNoMoreInteractions(channelService);
+        verifyNoMoreInteractions(userService);
+        verifyNoMoreInteractions(messageChannelService);
     }
 
     @Test
@@ -207,6 +251,23 @@ class MessageInChannelControllerTest {
                 .andExpect(jsonPath("$.id", equalTo(1)))
                 .andExpect(jsonPath("$.authorNick", equalTo("testNickname1")))
                 .andExpect(jsonPath("$.content", equalTo("testContent1")));
+
+        verify(channelService, times(1)).getChannelById(1);
+        verify(userService, times(1)).getUserByNick("testNickname1");
+
+        verify(messageChannelService, times(1)).saveMessage(
+                captor.capture(),
+                eq(user),
+                eq(channel)
+        );
+        assertThat(captor.getValue().getNickname(), equalTo("testNickname1"));
+        assertThat(captor.getValue().getContent(), equalTo("testContent1"));
+
+        verify(channelService, times(1)).userHasPermissionToSeeChannel(channel, "testNickname1");
+
+        verifyNoMoreInteractions(channelService);
+        verifyNoMoreInteractions(userService);
+        verifyNoMoreInteractions(messageChannelService);
     }
     //endregion
 
@@ -240,6 +301,20 @@ class MessageInChannelControllerTest {
                         .content(body))
                 .andDo(print())
                 .andExpect(status().isOk());
+
+        verify(channelService, times(1)).getChannelById(1);
+        verify(channelService, times(1)).userHasPermissionToSeeChannel(channel, "testNickname1");
+        verify(messageChannelService, times(1)).updateMessage(
+                eq(1),
+                captor.capture(),
+                eq(channel)
+        );
+        assertThat(captor.getValue().getNickname(), equalTo("testNickname1"));
+        assertThat(captor.getValue().getContent(), equalTo("testContentUpdated1"));
+
+        verifyNoMoreInteractions(channelService);
+        verifyNoMoreInteractions(messageChannelService);
+        verifyNoInteractions(userService);
     }
 
     @Test
@@ -274,6 +349,20 @@ class MessageInChannelControllerTest {
                 .andExpect(jsonPath("$.id", equalTo(1)))
                 .andExpect(jsonPath("$.authorNick", equalTo("testNickname1")))
                 .andExpect(jsonPath("$.content", equalTo("testContentUpdated1")));
+
+        verify(channelService, times(1)).getChannelById(1);
+        verify(channelService, times(1)).userHasPermissionToSeeChannel(channel, "testNickname1");
+        verify(messageChannelService, times(1)).updateMessage(
+                eq(1),
+                captor.capture(),
+                eq(channel)
+        );
+        assertThat(captor.getValue().getNickname(), equalTo("testNickname1"));
+        assertThat(captor.getValue().getContent(), equalTo("testContentUpdated1"));
+
+        verifyNoMoreInteractions(channelService);
+        verifyNoMoreInteractions(messageChannelService);
+        verifyNoInteractions(userService);
     }
     //endregion
 
@@ -298,15 +387,31 @@ class MessageInChannelControllerTest {
         when(messageChannelService.updateMessage(
                 ArgumentMatchers.anyInt(),
                 ArgumentMatchers.any(MessageController.MessageRequestDTO.class),
-                ArgumentMatchers.any(Channel.class)
+                ArgumentMatchers.any(Channel.class),
+                ArgumentMatchers.anyBoolean()
         )).thenReturn(updatedMessage);
 
-        mockMvc.perform(put("/messages/channels/1/1")
+        mockMvc.perform(delete("/messages/channels/1/1")
                         .headers(authorize())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andDo(print())
                 .andExpect(status().isOk());
+
+        verify(channelService, times(1)).getChannelById(1);
+        verify(channelService, times(1)).userHasPermissionToSeeChannel(channel, "testNickname1");
+        verify(messageChannelService, times(1)).updateMessage(
+                eq(1),
+                captor.capture(),
+                eq(channel),
+                eq(true)
+        );
+        assertThat(captor.getValue().getNickname(), equalTo("testNickname1"));
+        assertThat(captor.getValue().getContent(), equalTo("testContentUpdated1"));
+
+        verifyNoMoreInteractions(channelService);
+        verifyNoMoreInteractions(messageChannelService);
+        verifyNoInteractions(userService);
     }
     //endregion
 
