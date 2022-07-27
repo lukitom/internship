@@ -7,11 +7,13 @@ import com.zse.chat.user.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.AccessLevel;
 import lombok.Builder;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
+import lombok.Setter;
+import lombok.Value;
+import lombok.experimental.NonFinal;
+import lombok.extern.jackson.Jacksonized;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,6 +23,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @SecurityRequirement(name = "JWT")
+@Slf4j
 public class ChannelController {
 
     private final ChannelService channelService;
@@ -45,6 +48,7 @@ public class ChannelController {
         final var user = userService.getUserByNick(channelCreateDTO.getNickname());
         final var channel = channelService.saveChannel(user);
 
+        log.info("Channel with id: {} has been created by {}", channel.getId(), user.getNickname());
         return createChannelResponseDTO(channel);
     }
 
@@ -67,23 +71,21 @@ public class ChannelController {
     }
 
     //region DTOs
-    @Data
+    @Value
     @Builder
-    @FieldDefaults(level = AccessLevel.PRIVATE)
+    @Jacksonized
     static class ChannelRequestDTO implements UserNickname {
         Integer id;
+        @Setter
+        @NonFinal
         String nickname;
         String userNickname;
         ChannelUpdateAction action;
     }
 
-    @Data
     @Builder
-    @FieldDefaults(level = AccessLevel.PRIVATE)
-    static class ChannelResponseDTO {
-        int id;
-        List<String> owners;
-        List<String> members;
+    @Jacksonized
+    record ChannelResponseDTO(int id, List<String> owners, List<String> members) {
     }
     //endregion
 

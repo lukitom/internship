@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,6 +22,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @SecurityRequirement(name = "JWT")
+@Slf4j
 public class MessageInChannelController {
 
     private final MessageChannelService messageChannelService;
@@ -105,6 +107,7 @@ public class MessageInChannelController {
         checkAccess(channel, messageRequestDTO.getNickname());
 
         messageChannelService.updateMessage(messageId, messageRequestDTO, channel, true);
+        log.info("Message with id: {} has been deleted", messageId);
     }
 
     private MessageResponseDTO createMessageResponseDTO(Message message) {

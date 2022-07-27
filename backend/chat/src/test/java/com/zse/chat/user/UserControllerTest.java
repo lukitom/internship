@@ -60,13 +60,13 @@ class UserControllerTest {
 
     private UserController.CreateUserDTO.CreateUserDTOBuilder createUserForTestCreate(int number) {
         return UserController.CreateUserDTO.builder()
-                .nickname("testNickname" + 1)
-                .firstName("testFirstName" + 1)
-                .lastName("testLastName" + 1)
-                .email("testEmail" + 1)
-                .phoneNumber("testPhoneNumber" + 1)
-                .country("testCountry" + 1)
-                .city("testCity" + 1)
+                .nickname("testNickname" + number)
+                .firstName("testFirstName" + number)
+                .lastName("testLastName" + number)
+                .email("testEmail" + number)
+                .phoneNumber("testPhoneNumber" + number)
+                .country("testCountry" + number)
+                .city("testCity" + number)
                 .language(Optional.of(User.Language.POLISH));
     }
 
@@ -78,7 +78,9 @@ class UserControllerTest {
                 .phoneNumber(Optional.of("testPhoneNumber" + number))
                 .country(Optional.of("testCountry" + number))
                 .city(Optional.of("testCity" + number))
+                .userStatus(Optional.of(User.UserStatus.OFFLINE))
                 .language(Optional.of(User.Language.POLISH))
+                .timeZone(Optional.of("Europe/Warsaw"))
 
                 .showFirstNameAndLastName(Optional.of(false))
                 .showEmail(Optional.of(false))

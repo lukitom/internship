@@ -11,7 +11,7 @@ public class MessageFixture {
 
     public static Message.MessageBuilder createDefaultMessage(int number, User user) {
         return Message.builder()
-                .id(1)
+                .id(number)
                 .author(user)
                 .content("testContent" + number)
                 .createdAt(LocalDateTime.now());
