@@ -5,8 +5,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.*;
-import lombok.experimental.FieldDefaults;
+import lombok.Builder;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.Value;
+import lombok.experimental.NonFinal;
+import lombok.extern.jackson.Jacksonized;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
@@ -74,10 +78,9 @@ public class UserController {
     }
 
     //region DTOs
-    @Data
-    @AllArgsConstructor
+    @Value
     @Builder
-    @FieldDefaults(level = AccessLevel.PRIVATE)
+    @Jacksonized
     static class UserResponseDTO {
         String nickname;
         String firstName;
@@ -88,12 +91,12 @@ public class UserController {
         String city;
     }
 
-    @Data
-    @AllArgsConstructor
-    @NoArgsConstructor
+    @Value
     @Builder
-    @FieldDefaults(level = AccessLevel.PRIVATE)
+    @Jacksonized
     static class CreateUserDTO implements UserNickname {
+        @Setter
+        @NonFinal
         String nickname;
         String firstName;
         String lastName;
@@ -104,12 +107,12 @@ public class UserController {
         Optional<User.Language> language;
     }
 
-    @Data
-    @AllArgsConstructor
-    @NoArgsConstructor
+    @Value
     @Builder
-    @FieldDefaults(level = AccessLevel.PRIVATE)
+    @Jacksonized
     static class UpdateUserDTO implements UserNickname {
+        @Setter
+        @NonFinal
         String nickname;
 
         Optional<String> firstName;
@@ -129,14 +132,17 @@ public class UserController {
         Optional<Boolean> deleted;
     }
 
-    @Data
-    @AllArgsConstructor
-    @NoArgsConstructor
+    @Value
+    @Builder
+    @Jacksonized
     static class UserDetailRequestDTO implements UserNickname {
+        @Setter
+        @NonFinal
         String nickname;
     }
 
     @Builder
+    @Jacksonized
     record UserDetailResponseDTO(
             String nickname,
             String firstName,

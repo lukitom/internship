@@ -2,6 +2,7 @@ package com.zse.chat.message;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zse.chat.user.User;
+import com.zse.chat.user.UserFixture;
 import com.zse.chat.user.UserNotFoundException;
 import com.zse.chat.user.UserService;
 import org.junit.jupiter.api.Test;
@@ -14,7 +15,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.TimeZone;
 
 import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.when;
@@ -38,40 +38,17 @@ class MessageControllerTest {
     @MockBean
     private UserService userService;
 
-    //region fixture
-    private User.UserBuilder createUserForTest(int number){
-        return User.builder()
-                .nickname("testNickname" + number)
-                .firstName("testFirstName" + number)
-                .lastName("testLastName" + number)
-                .email("testEmail" + number)
-                .country("testCountry" + number)
-                .city("testCity" + number)
-                .phoneNumber("testPhoneNumber" + number)
-
-                .userStatus(User.UserStatus.OFFLINE)
-                .userLanguage(User.Language.POLISH)
-                .timeZone(TimeZone.getTimeZone("Europe/Warsaw"))
-
-                .showFirstNameAndLastName(false)
-                .showEmail(false)
-                .showPhoneNumber(false)
-                .showAddress(false)
-                .deleted(false);
-    }
-    //endregion
-
     //region GET("/messages")
     @Test
     public void shouldReturnAllMessages() throws Exception {
         List<Message> messages = new ArrayList<>();
         List<User> users = new ArrayList<>();
-        users.add(createUserForTest(1).build());
-        users.add(createUserForTest(2).build());
+        users.add(UserFixture.createDefaultUser(1).build());
+        users.add(UserFixture.createDefaultUser(2).build());
         messages.add(new Message(1, users.get(0), "content1", LocalDateTime.now(), null, false));
-        messages.add(new Message(2, users.get(1), "content2", LocalDateTime.now(), null,  false));
-        messages.add(new Message(3, users.get(0), "content3", LocalDateTime.now(), null,  false));
-        messages.add(new Message(4, users.get(0), "content4", LocalDateTime.now(), null,  false));
+        messages.add(new Message(2, users.get(1), "content2", LocalDateTime.now(), null, false));
+        messages.add(new Message(3, users.get(0), "content3", LocalDateTime.now(), null, false));
+        messages.add(new Message(4, users.get(0), "content4", LocalDateTime.now(), null, false));
 
         when(messageService.getAllMessagesInGlobalChannel()).thenReturn(messages);
 
@@ -98,7 +75,7 @@ class MessageControllerTest {
     @Test
     public void shouldReturnMessageById() throws Exception {
         int id = 1;
-        User user = createUserForTest(1).build();
+        User user = UserFixture.createDefaultUser(1).build();
         Message message = new Message(1, user, "content1", LocalDateTime.now(), null, false);
 
         when(messageService.getMessageById(id)).thenReturn(message);
@@ -131,20 +108,20 @@ class MessageControllerTest {
     @Test
     public void shouldCreateMessage() throws Exception {
         String nick = "testNick";
-        User user = createUserForTest(1).build();
+        User user = UserFixture.createDefaultUser(1).build();
         var messageRequestDTO = MessageController.MessageRequestDTO.builder()
                 .nickname(nick)
                 .content("content1")
                 .build();
-        Message message = new Message(1, user, "content1", LocalDateTime.now(), null,  false);
+        Message message = new Message(1, user, "content1", LocalDateTime.now(), null, false);
         String body = mapper.writeValueAsString(messageRequestDTO);
 
         when(userService.getUserByNick(nick)).thenReturn(user);
         when(messageService.saveMessage(messageRequestDTO, user)).thenReturn(message);
 
         mockMvc.perform(post("/messages")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(body))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", equalTo(1)))
@@ -178,16 +155,16 @@ class MessageControllerTest {
     @Test
     public void shouldReturnUpdatedMessage() throws Exception {
         int id = 1;
-        var messageRequesDTO = MessageController.MessageRequestDTO.builder()
+        var messageRequestDTO = MessageController.MessageRequestDTO.builder()
                 .nickname("testNickname1")
                 .content("content1Updated")
                 .build();
-        User user = createUserForTest(1).build();
+        User user = UserFixture.createDefaultUser(1).build();
         Message message = new Message(1, user, "content1Updated", LocalDateTime.now(), null, false);
 
-        String body = mapper.writeValueAsString(messageRequesDTO);
+        String body = mapper.writeValueAsString(messageRequestDTO);
 
-        when(messageService.updateMessageById(id, messageRequesDTO)).thenReturn(message);
+        when(messageService.updateMessageById(id, messageRequestDTO)).thenReturn(message);
 
         mockMvc.perform(put("/messages/1")
                 .contentType(MediaType.APPLICATION_JSON)

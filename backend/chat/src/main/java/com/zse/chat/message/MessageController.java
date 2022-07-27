@@ -7,7 +7,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.*;
+import lombok.Builder;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.Value;
+import lombok.experimental.NonFinal;
+import lombok.extern.jackson.Jacksonized;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
@@ -88,22 +93,24 @@ public class MessageController {
     }
 
     //region DTOs
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
+    @Value
     @Builder
+    @Jacksonized
     public static class MessageRequestDTO implements UserNickname {
-        private String nickname;
-        private String content;
+        @Setter
+        @NonFinal
+        String nickname;
+        String content;
     }
 
-    @Data
+    @Value
     @Builder
+    @Jacksonized
     public static class MessageResponseDTO {
-        private int id;
-        private String authorNick;
-        private String content;
-        private LocalDateTime createdAt;
+        int id;
+        String authorNick;
+        String content;
+        LocalDateTime createdAt;
     }
     //endregion
 
