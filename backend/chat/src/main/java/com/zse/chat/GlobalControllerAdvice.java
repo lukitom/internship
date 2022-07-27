@@ -2,8 +2,8 @@ package com.zse.chat;
 
 import com.zse.chat.channel.ChannelNotFoundException;
 import com.zse.chat.channel.ChannelUpdateFailedException;
-import com.zse.chat.login.MessageUpdateFailedException;
 import com.zse.chat.login.InvalidJWTException;
+import com.zse.chat.login.MessageUpdateFailedException;
 import com.zse.chat.login.MissingJWTException;
 import com.zse.chat.message.MessageNotFoundException;
 import com.zse.chat.message.channel.ChannelAccessFailedException;
@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import javax.validation.ConstraintViolationException;
 import java.time.LocalDateTime;
 
 @RestControllerAdvice
@@ -78,11 +79,21 @@ public class GlobalControllerAdvice {
             ChannelUpdateFailedException.class,
             ChannelAccessFailedException.class
     })
-    public ExceptionResponse updateForbidden(Exception exception){
+    public ExceptionResponse updateForbidden(Exception exception) {
         log.error("Generating action forbidden response due to: {}", exception.getMessage());
         return ExceptionResponse.builder()
                 .responseCode(HttpStatus.FORBIDDEN.value())
                 .exceptionMessage(exception.getMessage())
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ExceptionResponse inValidData(ConstraintViolationException exception) {
+        return ExceptionResponse.builder()
+                .responseCode(HttpStatus.BAD_REQUEST.value())
+                .exceptionMessage(exception.getConstraintViolations().stream().findFirst().get().getMessage())
                 .timestamp(LocalDateTime.now())
                 .build();
     }

@@ -14,6 +14,7 @@ import lombok.extern.jackson.Jacksonized;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 
@@ -60,7 +61,7 @@ public class UserController {
 
     @Operation(summary = "Create new User")
     @PostMapping
-    public UserResponseDTO createUser(@RequestBody CreateUserDTO createUserDTO){
+    public UserResponseDTO createUser(@RequestBody @Valid CreateUserDTO createUserDTO) {
         final var savedUser = userService.saveUser(createUserDTO);
 
         log.info("User with nickname: {} has been created", createUserDTO.getNickname());
