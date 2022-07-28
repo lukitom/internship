@@ -78,7 +78,7 @@ public class MessageInChannelController {
     @PutMapping("/{messageId}")
     @VerifyJWT
     public MessageResponseDTO updateMessage(
-            MessageRequestDTO messageRequestDTO,
+            @RequestBody MessageRequestDTO messageRequestDTO,
             @PathVariable int channelId,
             @PathVariable int messageId
     ) {
@@ -99,7 +99,7 @@ public class MessageInChannelController {
     @DeleteMapping("/{messageId}")
     @VerifyJWT
     public void deleteMessage(
-            MessageRequestDTO messageRequestDTO,
+            @RequestBody MessageRequestDTO messageRequestDTO,
             @PathVariable int channelId,
             @PathVariable int messageId
     ) {
