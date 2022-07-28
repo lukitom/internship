@@ -110,8 +110,9 @@ public class UserController {
         String lastName;
         @Email(message = "Email should be correctly formatted")
         String email;
-        @Pattern(regexp = "\\d{9}", message = "Provide phone number in format 111222333 (9 numbers without space)")
+        @Pattern(regexp = "\\d{9}", message = "Provide phone number in format 111222333 (9 digits without space)")
         String phoneNumber;
+        @Pattern(regexp = "\\+\\d\\d", message = "Phone prefix should start by '+' then 2 digits")
         String phonePrefix;
         @Pattern(regexp = "[A-Z][a-z]*", message = "Country should be starting with capital letter then all small letters")
         String country;
