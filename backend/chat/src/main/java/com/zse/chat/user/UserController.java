@@ -78,17 +78,18 @@ public class UserController {
     }
 
     //region DTOs
-    @Value
     @Builder
     @Jacksonized
-    static class UserResponseDTO {
-        String nickname;
-        String firstName;
-        String lastName;
-        String email;
-        String phoneNumber;
-        String country;
-        String city;
+    record UserResponseDTO(
+            String nickname,
+            String firstName,
+            String lastName,
+            String email,
+            String phoneNumber,
+            String phonePrefix,
+            String country,
+            String city
+    ) {
     }
 
     @Value
@@ -102,6 +103,7 @@ public class UserController {
         String lastName;
         String email;
         String phoneNumber;
+        String phonePrefix;
         String country;
         String city;
         Optional<User.Language> language;
@@ -118,6 +120,7 @@ public class UserController {
         Optional<String> firstName;
         Optional<String> lastName;
         Optional<String> phoneNumber;
+        Optional<String> phonePrefix;
         Optional<String> country;
         Optional<String> city;
         Optional<User.UserStatus> userStatus;
@@ -149,6 +152,7 @@ public class UserController {
             String lastName,
             String email,
             String phoneNumber,
+            String phonePrefix,
             String country,
             String city,
             String userStatus,
@@ -171,6 +175,7 @@ public class UserController {
                 .city(user.getShowAddress() ? user.getCity() : null)
                 .country(user.getShowAddress() ? user.getCountry() : null)
                 .phoneNumber(user.getShowPhoneNumber() ? user.getPhoneNumber() : null)
+                .phonePrefix(user.getShowPhoneNumber() ? user.getPhonePrefix() : null)
                 .build();
     }
 
@@ -181,6 +186,7 @@ public class UserController {
                 .lastName(user.getLastName())
                 .email(user.getEmail())
                 .phoneNumber(user.getPhoneNumber())
+                .phonePrefix(user.getPhonePrefix())
                 .country(user.getCountry())
                 .city(user.getCity())
                 .userStatus(String.valueOf(user.getUserStatus()))

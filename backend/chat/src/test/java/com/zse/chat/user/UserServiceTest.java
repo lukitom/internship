@@ -41,6 +41,7 @@ class UserServiceTest {
                 .lastName("testLastName" + number)
                 .email("testEmail" + number)
                 .phoneNumber("testPhoneNumber" + number)
+                .phonePrefix("+4" + number % 10)
                 .country("testCountry" + number)
                 .city("testCity" + number)
                 .language(Optional.of(User.Language.POLISH));
@@ -52,6 +53,7 @@ class UserServiceTest {
                 .firstName(Optional.of("testFirstNameUpdated" + number))
                 .lastName(Optional.of("testLastNameUpdated" + number))
                 .phoneNumber(Optional.of("testPhoneNumberUpdated" + number))
+                .phonePrefix(Optional.of("+4" + number % 10))
                 .country(Optional.of("testCountryUpdated" + number))
                 .city(Optional.of("testCityUpdated" + number))
                 .userStatus(Optional.of(User.UserStatus.OFFLINE))
@@ -99,6 +101,7 @@ class UserServiceTest {
         assertThat(user.getLastName(), equalTo("testLastName1"));
         assertThat(user.getEmail(), equalTo("testEmail1"));
         assertThat(user.getPhoneNumber(), equalTo("testPhoneNumber1"));
+        assertThat(user.getPhonePrefix(), equalTo("+41"));
         assertThat(user.getCountry(), equalTo("testCountry1"));
         assertThat(user.getCity(), equalTo("testCity1"));
         assertThat(user.getUserLanguage(), equalTo(User.Language.POLISH));
@@ -236,6 +239,7 @@ class UserServiceTest {
         assertThat(returnedUser.getLastName(), equalTo("testLastName1"));
         assertThat(returnedUser.getEmail(), equalTo("testEmail1"));
         assertThat(returnedUser.getPhoneNumber(), equalTo("testPhoneNumber1"));
+        assertThat(returnedUser.getPhonePrefix(), equalTo("+41"));
         assertThat(returnedUser.getCountry(), equalTo("testCountry1"));
         assertThat(returnedUser.getCity(), equalTo("testCity1"));
         assertThat(returnedUser.getUserLanguage(), equalTo(User.Language.POLISH));
@@ -298,6 +302,7 @@ class UserServiceTest {
         assertThat(updatedUser.getLastName(), equalTo("testLastNameUpdated1"));
         assertThat(updatedUser.getEmail(), equalTo("testEmail1"));
         assertThat(updatedUser.getPhoneNumber(), equalTo("testPhoneNumberUpdated1"));
+        assertThat(updatedUser.getPhonePrefix(), equalTo("+41"));
         assertThat(updatedUser.getCountry(), equalTo("testCountryUpdated1"));
         assertThat(updatedUser.getCity(), equalTo("testCityUpdated1"));
         assertThat(updatedUser.getUserLanguage(), equalTo(User.Language.POLISH));

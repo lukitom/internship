@@ -14,6 +14,7 @@ public class UserFixture {
                 .lastName("testLastName" + number)
                 .email("testEmail" + number)
                 .phoneNumber("testPhoneNumber" + number)
+                .phonePrefix("+4" + number % 10)
                 .country("testCountry" + number)
                 .city("testCity" + number)
                 .userLanguage(User.Language.POLISH)

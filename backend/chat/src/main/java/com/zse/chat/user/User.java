@@ -37,6 +37,7 @@ public class User {
     @Column(unique = true, nullable = false)
     String email;
     String phoneNumber;
+    String phonePrefix;
     String country;
     String city;
     UserStatus userStatus;
@@ -63,6 +64,7 @@ public class User {
         this.country = "";
         this.city = "";
         this.phoneNumber = "";
+        this.phonePrefix = "";
 
         this.userStatus = UserStatus.OFFLINE;
         this.userLanguage = Language.POLISH;
