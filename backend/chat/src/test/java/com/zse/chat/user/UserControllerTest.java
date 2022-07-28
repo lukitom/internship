@@ -63,10 +63,10 @@ class UserControllerTest {
                 .nickname("testNickname" + number)
                 .firstName("testFirstName" + number)
                 .lastName("testLastName" + number)
-                .email("testEmail" + number)
-                .phoneNumber("testPhoneNumber" + number)
-                .country("testCountry" + number)
-                .city("testCity" + number)
+                .email("testEmail" + number + "@mail.com")
+                .phoneNumber("11122233" + number)
+                .country("Testcountry")
+                .city("Testcity")
                 .language(Optional.of(User.Language.POLISH));
     }
 

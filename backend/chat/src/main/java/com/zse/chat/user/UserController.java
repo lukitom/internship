@@ -14,6 +14,10 @@ import lombok.extern.jackson.Jacksonized;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 import java.util.List;
 import java.util.Optional;
 
@@ -60,7 +64,7 @@ public class UserController {
 
     @Operation(summary = "Create new User")
     @PostMapping
-    public UserResponseDTO createUser(@RequestBody CreateUserDTO createUserDTO){
+    public UserResponseDTO createUser(@RequestBody @Valid CreateUserDTO createUserDTO) {
         final var savedUser = userService.saveUser(createUserDTO);
 
         log.info("User with nickname: {} has been created", createUserDTO.getNickname());
@@ -97,12 +101,19 @@ public class UserController {
     static class CreateUserDTO implements UserNickname {
         @Setter
         @NonFinal
+        @Size(min = 3, message = "Nickname length should be at least 3 characters")
         String nickname;
+        @Size(min = 3, message = "First name length should be at least 3 characters")
         String firstName;
+        @Size(min = 3, message = "Last name length should be at least 3 characters")
         String lastName;
+        @Email(message = "Email should be correctly formatted")
         String email;
+        @Pattern(regexp = "\\d{9}", message = "Provide phone number in format 111222333 (9 numbers without space)")
         String phoneNumber;
+        @Pattern(regexp = "[A-Z][a-z]*", message = "Country should be starting with capital letter then all small letters")
         String country;
+        @Pattern(regexp = "[A-Z][a-z]*", message = "City should be starting with capital letter then all small letters")
         String city;
         Optional<User.Language> language;
     }
