@@ -7,8 +7,6 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 
 import javax.persistence.*;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.Size;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
@@ -33,14 +31,10 @@ public class User {
     )
     int id;
     @Column(unique = true, nullable = false)
-    @Size(min = 3)
     String nickname;
-    @Size(min = 3)
     String firstName;
-    @Size(min = 3)
     String lastName;
     @Column(unique = true, nullable = false)
-    @Email(message = "Email should be in correct format")
     String email;
     String phoneNumber;
     String country;
