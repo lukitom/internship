@@ -237,11 +237,11 @@ class UserServiceTest {
         assertThat(returnedUser.getNickname(), equalTo("testNickname1"));
         assertThat(returnedUser.getFirstName(), equalTo("testFirstName1"));
         assertThat(returnedUser.getLastName(), equalTo("testLastName1"));
-        assertThat(returnedUser.getEmail(), equalTo("testEmail1"));
-        assertThat(returnedUser.getPhoneNumber(), equalTo("testPhoneNumber1"));
+        assertThat(returnedUser.getEmail(), equalTo("testEmail1@mail.com"));
+        assertThat(returnedUser.getPhoneNumber(), equalTo("111222331"));
         assertThat(returnedUser.getPhonePrefix(), equalTo("+41"));
-        assertThat(returnedUser.getCountry(), equalTo("testCountry1"));
-        assertThat(returnedUser.getCity(), equalTo("testCity1"));
+        assertThat(returnedUser.getCountry(), equalTo("Testcountry"));
+        assertThat(returnedUser.getCity(), equalTo("Testcity"));
         assertThat(returnedUser.getUserLanguage(), equalTo(User.Language.POLISH));
         assertThat(returnedUser.getTimeZone(), equalTo(TimeZone.getTimeZone("Europe/Warsaw")));
         assertThat(returnedUser.getUserStatus(), equalTo(User.UserStatus.OFFLINE));
@@ -300,7 +300,7 @@ class UserServiceTest {
         assertThat(updatedUser.getNickname(), equalTo("testNickname1"));
         assertThat(updatedUser.getFirstName(), equalTo("testFirstNameUpdated1"));
         assertThat(updatedUser.getLastName(), equalTo("testLastNameUpdated1"));
-        assertThat(updatedUser.getEmail(), equalTo("testEmail1"));
+        assertThat(updatedUser.getEmail(), equalTo("testEmail1@mail.com"));
         assertThat(updatedUser.getPhoneNumber(), equalTo("testPhoneNumberUpdated1"));
         assertThat(updatedUser.getPhonePrefix(), equalTo("+41"));
         assertThat(updatedUser.getCountry(), equalTo("testCountryUpdated1"));

@@ -64,11 +64,11 @@ class UserControllerTest {
                 .nickname("testNickname" + number)
                 .firstName("testFirstName" + number)
                 .lastName("testLastName" + number)
-                .email("testEmail" + number)
-                .phoneNumber("testPhoneNumber" + number)
+                .email("testEmail" + number + "@mail.com")
+                .phoneNumber("11122233" + number)
                 .phonePrefix("+4" + number % 10)
-                .country("testCountry" + number)
-                .city("testCity" + number)
+                .country("TestCountry" + number)
+                .city("TestCity" + number)
                 .language(Optional.of(User.Language.POLISH));
     }
 
