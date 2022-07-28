@@ -23,7 +23,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @SecurityRequirement(name = "JWT")
 @Slf4j
-public class MessageInChannelController {
+public class MessageChannelController {
 
     private final MessageChannelService messageChannelService;
     private final UserService userService;
@@ -42,7 +42,7 @@ public class MessageInChannelController {
         final var channel = channelService.getChannelById(channelId);
         checkAccess(channel, messageRequestDTO.getNickname());
 
-        final List<Message> messages = messageChannelService.getMessages(channel);
+        final List<Message> messages = channel.getMessages();
 
         return messages.stream()
                 .map(this::createMessageResponseDTO).toList();

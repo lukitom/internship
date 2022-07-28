@@ -132,17 +132,14 @@ class UserServiceTest {
                 .email(missingEmail ? null : "testEmail1")
                 .build();
 
-        assertThrows(
+        final var result = assertThrows(
                 MissingPayloadFieldException.class,
                 () -> userService.saveUser(createUserDTO));
 
-        try {
-            userService.saveUser(createUserDTO);
-        } catch (MissingPayloadFieldException e) {
-            assertThat(e.getMessage(), containsString(
-                    missingNickname ? "nickname" : missingEmail ? "email" : null)
-            );
-        }
+        assertThat(result.getMessage(), containsString(
+                missingNickname ? "nickname" : missingEmail ? "email" : null)
+        );
+
         verifyNoMoreInteractions(userRepository);
     }
 
