@@ -1,6 +1,5 @@
 package com.zse.chat;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zse.chat.channel.ChannelNotFoundException;
 import com.zse.chat.channel.ChannelUpdateFailedException;
 import com.zse.chat.login.InvalidJWTException;
@@ -14,27 +13,21 @@ import com.zse.chat.user.UserWithEmailAlreadyExistsExeption;
 import com.zse.chat.user.UserWithNickAlreadyExistsException;
 import lombok.Builder;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
-import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestControllerAdvice
 @Slf4j
-@RequiredArgsConstructor
 public class GlobalControllerAdvice {
-
-    private final ObjectMapper mapper;
 
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler({
@@ -100,15 +93,12 @@ public class GlobalControllerAdvice {
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ExceptionResponse inValidData(MethodArgumentNotValidException exception) {
-        BindingResult result = exception.getBindingResult();
+    public ExceptionResponse invalidData(MethodArgumentNotValidException exception) {
+        Map<String, String> fieldErrors = exception.getBindingResult().getAllErrors()
+                .stream()
+                .map(e -> (FieldError) e)
+                .collect(Collectors.toMap(FieldError::getField, FieldError::getDefaultMessage));
 
-        Map<String, String> fieldErrors = new HashMap<>();
-        for (ObjectError e : result.getAllErrors()) {
-            String field = ((FieldError) e).getField();
-            String message = e.getDefaultMessage();
-            fieldErrors.put(field, message);
-        }
 
         return ExceptionResponse.builder()
                 .responseCode(HttpStatus.BAD_REQUEST.value())
