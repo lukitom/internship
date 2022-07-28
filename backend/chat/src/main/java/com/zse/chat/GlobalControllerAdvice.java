@@ -94,15 +94,20 @@ public class GlobalControllerAdvice {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ExceptionResponse invalidData(MethodArgumentNotValidException exception) {
-        Map<String, String> fieldErrors = exception.getBindingResult().getAllErrors()
+        final var errors = exception.getBindingResult().getAllErrors()
                 .stream()
+                .filter(e -> e instanceof FieldError)
                 .map(e -> (FieldError) e)
-                .collect(Collectors.toMap(FieldError::getField, FieldError::getDefaultMessage));
-
+                .filter(e -> e.getDefaultMessage() != null)
+                .collect(Collectors.toUnmodifiableMap
+                        (FieldError::getField,
+                                FieldError::getDefaultMessage
+                        )
+                );
 
         return ExceptionResponse.builder()
                 .responseCode(HttpStatus.BAD_REQUEST.value())
-                .fieldErrors(fieldErrors)
+                .fieldErrors(errors)
                 .timestamp(LocalDateTime.now())
                 .build();
     }
