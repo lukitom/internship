@@ -14,6 +14,10 @@ import lombok.extern.jackson.Jacksonized;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 import java.util.List;
 import java.util.Optional;
 
@@ -60,7 +64,7 @@ public class UserController {
 
     @Operation(summary = "Create new User")
     @PostMapping
-    public UserResponseDTO createUser(@RequestBody CreateUserDTO createUserDTO){
+    public UserResponseDTO createUser(@RequestBody @Valid CreateUserDTO createUserDTO) {
         final var savedUser = userService.saveUser(createUserDTO);
 
         log.info("User with nickname: {} has been created", createUserDTO.getNickname());
@@ -78,17 +82,18 @@ public class UserController {
     }
 
     //region DTOs
-    @Value
     @Builder
     @Jacksonized
-    static class UserResponseDTO {
-        String nickname;
-        String firstName;
-        String lastName;
-        String email;
-        String phoneNumber;
-        String country;
-        String city;
+    record UserResponseDTO(
+            String nickname,
+            String firstName,
+            String lastName,
+            String email,
+            String phoneNumber,
+            String phonePrefix,
+            String country,
+            String city
+    ) {
     }
 
     @Value
@@ -97,12 +102,21 @@ public class UserController {
     static class CreateUserDTO implements UserNickname {
         @Setter
         @NonFinal
+        @Size(min = 3, message = "Nickname length should be at least 3 characters")
         String nickname;
+        @Size(min = 3, message = "First name length should be at least 3 characters")
         String firstName;
+        @Size(min = 3, message = "Last name length should be at least 3 characters")
         String lastName;
+        @Email(message = "Email should be correctly formatted")
         String email;
+        @Pattern(regexp = "\\d{9}", message = "Provide phone number in format 111222333 (9 digits without space)")
         String phoneNumber;
+        @Pattern(regexp = "\\+\\d\\d", message = "Phone prefix should start by '+' then 2 digits")
+        String phonePrefix;
+        @Pattern(regexp = "[A-Z][a-z]*", message = "Country should be starting with capital letter then all small letters")
         String country;
+        @Pattern(regexp = "[A-Z][a-z]*", message = "City should be starting with capital letter then all small letters")
         String city;
         Optional<User.Language> language;
     }
@@ -118,6 +132,7 @@ public class UserController {
         Optional<String> firstName;
         Optional<String> lastName;
         Optional<String> phoneNumber;
+        Optional<String> phonePrefix;
         Optional<String> country;
         Optional<String> city;
         Optional<User.UserStatus> userStatus;
@@ -149,6 +164,7 @@ public class UserController {
             String lastName,
             String email,
             String phoneNumber,
+            String phonePrefix,
             String country,
             String city,
             String userStatus,
@@ -171,6 +187,7 @@ public class UserController {
                 .city(user.getShowAddress() ? user.getCity() : null)
                 .country(user.getShowAddress() ? user.getCountry() : null)
                 .phoneNumber(user.getShowPhoneNumber() ? user.getPhoneNumber() : null)
+                .phonePrefix(user.getShowPhoneNumber() ? user.getPhonePrefix() : null)
                 .build();
     }
 
@@ -181,6 +198,7 @@ public class UserController {
                 .lastName(user.getLastName())
                 .email(user.getEmail())
                 .phoneNumber(user.getPhoneNumber())
+                .phonePrefix(user.getPhonePrefix())
                 .country(user.getCountry())
                 .city(user.getCity())
                 .userStatus(String.valueOf(user.getUserStatus()))

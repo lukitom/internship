@@ -46,6 +46,7 @@ class UserControllerTest {
                 .country("testCountry" + number)
                 .city("testCity" + number)
                 .phoneNumber("testPhoneNumber" + number)
+                .phonePrefix("+4" + number % 10)
 
                 .userStatus(User.UserStatus.OFFLINE)
                 .userLanguage(User.Language.POLISH)
@@ -63,10 +64,11 @@ class UserControllerTest {
                 .nickname("testNickname" + number)
                 .firstName("testFirstName" + number)
                 .lastName("testLastName" + number)
-                .email("testEmail" + number)
-                .phoneNumber("testPhoneNumber" + number)
-                .country("testCountry" + number)
-                .city("testCity" + number)
+                .email("testEmail" + number + "@mail.com")
+                .phoneNumber("11122233" + number)
+                .phonePrefix("+4" + number % 10)
+                .country("TestCountry" + number)
+                .city("TestCity" + number)
                 .language(Optional.of(User.Language.POLISH));
     }
 
@@ -293,6 +295,11 @@ class UserControllerTest {
                         showPhoneNumber ?
                                 jsonPath("$.phoneNumber", equalTo("testPhoneNumber1")) :
                                 jsonPath("$.phoneNumber").doesNotExist()
+                )
+                .andExpect(
+                        showPhoneNumber ?
+                                jsonPath("$.phonePrefix", equalTo("+41")) :
+                                jsonPath("$.phonePrefix").doesNotExist()
                 )
                 .andExpect(
                         showAddress ?

@@ -2,8 +2,8 @@ package com.zse.chat;
 
 import com.zse.chat.channel.ChannelNotFoundException;
 import com.zse.chat.channel.ChannelUpdateFailedException;
-import com.zse.chat.login.MessageUpdateFailedException;
 import com.zse.chat.login.InvalidJWTException;
+import com.zse.chat.login.MessageUpdateFailedException;
 import com.zse.chat.login.MissingJWTException;
 import com.zse.chat.message.MessageNotFoundException;
 import com.zse.chat.message.channel.ChannelAccessFailedException;
@@ -15,11 +15,15 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestControllerAdvice
 @Slf4j
@@ -31,7 +35,7 @@ public class GlobalControllerAdvice {
             MessageNotFoundException.class,
             ChannelNotFoundException.class
     })
-    public ExceptionResponse notFoundExceptionHandle(Exception notFoundException){
+    public ExceptionResponse notFoundExceptionHandle(Exception notFoundException) {
         log.warn("Generating not found response due to : {}", notFoundException.getMessage());
         return ExceptionResponse.builder()
                 .responseCode(HttpStatus.NOT_FOUND.value())
@@ -78,11 +82,32 @@ public class GlobalControllerAdvice {
             ChannelUpdateFailedException.class,
             ChannelAccessFailedException.class
     })
-    public ExceptionResponse updateForbidden(Exception exception){
+    public ExceptionResponse updateForbidden(Exception exception) {
         log.error("Generating action forbidden response due to: {}", exception.getMessage());
         return ExceptionResponse.builder()
                 .responseCode(HttpStatus.FORBIDDEN.value())
                 .exceptionMessage(exception.getMessage())
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ExceptionResponse invalidData(MethodArgumentNotValidException exception) {
+        final var errors = exception.getBindingResult().getAllErrors()
+                .stream()
+                .filter(e -> e instanceof FieldError)
+                .map(e -> (FieldError) e)
+                .filter(e -> e.getDefaultMessage() != null)
+                .collect(Collectors.toUnmodifiableMap
+                        (FieldError::getField,
+                                FieldError::getDefaultMessage
+                        )
+                );
+
+        return ExceptionResponse.builder()
+                .responseCode(HttpStatus.BAD_REQUEST.value())
+                .fieldErrors(errors)
                 .timestamp(LocalDateTime.now())
                 .build();
     }
@@ -94,6 +119,7 @@ public class GlobalControllerAdvice {
         int responseCode;
         String exceptionMessage;
         LocalDateTime timestamp;
+        Map<String, String> fieldErrors;
 
     }
 }
